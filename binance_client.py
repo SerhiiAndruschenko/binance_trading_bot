@@ -161,30 +161,36 @@ class BinanceClient:
             quantity=quantity,
         )
 
-    @retry()
     def place_stop_order(self, symbol: str, side: str,
                          quantity: float, stop_price: float) -> dict:
-        """Розміщує STOP_MARKET ордер (для SL)."""
+        """
+        Розміщує STOP_MARKET ордер (для SL).
+        Без @retry — помилка -4120 є постійним обмеженням API (не мережева),
+        тому повторні спроби лише додають затримку (3×5 сек = 15 сек).
+        Fallback — soft monitoring в головному циклі.
+        """
         return self.client.futures_create_order(  # type: ignore[return-value]
             symbol=symbol,
             side=side,
             type="STOP_MARKET",
             quantity=quantity,
             stopPrice=round(stop_price, 2),
-            closePosition=True,
+            reduceOnly=True,
         )
 
-    @retry()
     def place_take_profit_order(self, symbol: str, side: str,
                                 quantity: float, stop_price: float) -> dict:
-        """Розміщує TAKE_PROFIT_MARKET ордер."""
+        """
+        Розміщує TAKE_PROFIT_MARKET ордер.
+        Без @retry з тієї ж причини що й place_stop_order.
+        """
         return self.client.futures_create_order(  # type: ignore[return-value]
             symbol=symbol,
             side=side,
             type="TAKE_PROFIT_MARKET",
             quantity=quantity,
             stopPrice=round(stop_price, 2),
-            closePosition=True,
+            reduceOnly=True,
         )
 
     @retry()
@@ -201,6 +207,45 @@ class BinanceClient:
         side = "SELL" if position_amt > 0 else "BUY"
         quantity = abs(position_amt)
         return self.place_market_order(symbol, side, quantity)
+
+    # ─── Фільтри символів (кеш) ───────────────────────────────────────────────
+
+    # Кеш: symbol → {"step_size": float, "min_qty": float, "qty_precision": int}
+    _symbol_filters: dict = {}
+
+    def get_symbol_filters(self, symbol: str) -> dict:
+        """
+        Повертає LOT_SIZE фільтр для символу (stepSize, minQty, qty_precision).
+        Результат кешується — exchange_info завантажується лише один раз.
+        """
+        if symbol in self._symbol_filters:
+            return self._symbol_filters[symbol]
+
+        try:
+            info = self.get_exchange_info()
+            for s in info.get("symbols", []):
+                if s["symbol"] != symbol:
+                    continue
+                for f in s.get("filters", []):
+                    if f["filterType"] == "LOT_SIZE":
+                        step  = float(f["stepSize"])
+                        minq  = float(f["minQty"])
+                        # Кількість знаків після коми зі stepSize ("0.001" → 3)
+                        prec  = len(f["stepSize"].rstrip("0").split(".")[-1]) if "." in f["stepSize"] else 0
+                        result = {"step_size": step, "min_qty": minq, "qty_precision": prec}
+                        self._symbol_filters[symbol] = result
+                        log.debug(
+                            "%s фільтри: stepSize=%s minQty=%s precision=%d",
+                            symbol, step, minq, prec,
+                        )
+                        return result
+        except Exception as e:
+            log.warning("Не вдалося отримати фільтри для %s: %s", symbol, e)
+
+        # Fallback-значення якщо API недоступний
+        fallback = {"step_size": 0.001, "min_qty": 0.001, "qty_precision": 3}
+        self._symbol_filters[symbol] = fallback
+        return fallback
 
     # ─── Допоміжні ────────────────────────────────────────────────────────────
 

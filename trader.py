@@ -107,19 +107,36 @@ def open_position(result: SignalResult) -> Optional[OpenTrade]:
         log.error("Помилка відкриття ордеру [%s]: %s", symbol, e)
         return None
 
-    # 7. Встановлюємо SL і TP
+    # 7. Намагаємося виставити SL/TP на біржі (одна спроба, без retry).
+    #    Помилка -4120 = постійне обмеження Testnet/API — retry марний.
+    #    Soft monitoring в циклі гарантує виконання SL/TP у будь-якому разі.
     close_side = "SELL" if signal == Signal.LONG else "BUY"
+    sl_on_exchange = False
+    tp_on_exchange = False
+
     try:
         binance.place_stop_order(symbol, close_side, params.quantity, params.stop_loss)
-        log.info("[%s] SL ордер: %.2f USDT", symbol, params.stop_loss)
+        log.info("[%s] ✅ SL ордер на біржі: %.2f USDT", symbol, params.stop_loss)
+        sl_on_exchange = True
     except Exception as e:
-        log.error("Не вдалося встановити SL для %s: %s", symbol, e)
+        # -4120 = Algo Order endpoint потрібен (Testnet обмеження) — не помилка, просто fallback
+        log.debug("[%s] SL не виставлено на біржі (%s) — soft monitoring активний", symbol, e)
 
     try:
         binance.place_take_profit_order(symbol, close_side, params.quantity, params.take_profit)
-        log.info("[%s] TP ордер: %.2f USDT", symbol, params.take_profit)
+        log.info("[%s] ✅ TP ордер на біржі: %.2f USDT", symbol, params.take_profit)
+        tp_on_exchange = True
     except Exception as e:
-        log.error("Не вдалося встановити TP для %s: %s", symbol, e)
+        log.debug("[%s] TP не виставлено на біржі (%s) — soft monitoring активний", symbol, e)
+
+    # Завжди повідомляємо де саме контролюються SL/TP
+    if sl_on_exchange and tp_on_exchange:
+        log.info("[%s] 🛡 SL/TP виставлено на біржі", symbol)
+    else:
+        log.info(
+            "[%s] 🔁 SL/TP моніторяться ботом: SL=%.2f | TP=%.2f (перевірка щохвилини)",
+            symbol, params.stop_loss, params.take_profit,
+        )
 
     # 8. Зберігаємо в пам'яті
     trade = OpenTrade(
@@ -245,3 +262,67 @@ def check_exit_by_signal(symbol: str, new_signal: Signal) -> bool:
 def get_open_trades() -> dict[str, OpenTrade]:
     """Повертає копію словника відкритих угод."""
     return dict(_open_trades)
+
+
+# ─── Soft SL/TP моніторинг ───────────────────────────────────────────────────
+
+def check_sl_tp_all() -> None:
+    """
+    Перевіряє всі відкриті угоди: чи досягли вони SL або TP за поточною ціною.
+    Викликається в кожному циклі сканування.
+
+    Використовується замість exchange-side STOP_MARKET / TAKE_PROFIT_MARKET,
+    бо Binance Testnet повертає помилку -4120 для цих типів ордерів.
+    """
+    if not _open_trades:
+        return
+
+    for symbol, trade in list(_open_trades.items()):
+        try:
+            current_price = binance.get_symbol_price(symbol)
+            tp = trade.params.take_profit
+            sl = trade.params.stop_loss
+
+            if trade.signal == "LONG":
+                if current_price >= tp:
+                    log.info(
+                        "🎯 [%s] TP досягнуто: %.2f >= %.2f",
+                        symbol, current_price, tp,
+                    )
+                    close_position(symbol, f"TP {tp:.2f}")
+                elif current_price <= sl:
+                    log.info(
+                        "🛑 [%s] SL спрацював: %.2f <= %.2f",
+                        symbol, current_price, sl,
+                    )
+                    close_position(symbol, f"SL {sl:.2f}")
+                else:
+                    # Показуємо P&L у реальному часі
+                    pnl_pct = (current_price - trade.params.entry_price) / trade.params.entry_price * 100
+                    log.info(
+                        "📌 [%s] LONG | Ціна=%.2f | TP=%.2f | SL=%.2f | P&L=%.2f%%",
+                        symbol, current_price, tp, sl, pnl_pct,
+                    )
+
+            else:  # SHORT
+                if current_price <= tp:
+                    log.info(
+                        "🎯 [%s] TP досягнуто: %.2f <= %.2f",
+                        symbol, current_price, tp,
+                    )
+                    close_position(symbol, f"TP {tp:.2f}")
+                elif current_price >= sl:
+                    log.info(
+                        "🛑 [%s] SL спрацював: %.2f >= %.2f",
+                        symbol, current_price, sl,
+                    )
+                    close_position(symbol, f"SL {sl:.2f}")
+                else:
+                    pnl_pct = (trade.params.entry_price - current_price) / trade.params.entry_price * 100
+                    log.info(
+                        "📌 [%s] SHORT | Ціна=%.2f | TP=%.2f | SL=%.2f | P&L=%.2f%%",
+                        symbol, current_price, tp, sl, pnl_pct,
+                    )
+
+        except Exception as e:
+            log.error("Помилка SL/TP перевірки для %s: %s", symbol, e)

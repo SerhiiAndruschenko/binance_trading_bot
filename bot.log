@@ -1,1 +1,255 @@
 [2026-04-06 21:22:10] INFO     binance_bot — logger OK
+[2026-04-06 22:48:11] INFO     binance_bot — 🔧 Режим: TESTNET (https://testnet.binancefuture.com)
+[2026-04-06 22:48:12] INFO     binance_bot — ============================================================
+[2026-04-06 22:48:12] INFO     binance_bot — 🤖 Binance Futures Bot стартує…
+[2026-04-06 22:48:12] INFO     binance_bot — Режим: 🔧 TESTNET
+[2026-04-06 22:48:12] INFO     binance_bot — Пари: BTCUSDT, ETHUSDT, SOLUSDT
+[2026-04-06 22:48:12] INFO     binance_bot — Таймфрейм: 15m | Плече: x5 | Ризик/угода: 2%
+[2026-04-06 22:48:12] INFO     binance_bot — ============================================================
+[2026-04-06 22:48:13] INFO     binance_bot — ✅ З'єднання з Binance API встановлено
+[2026-04-06 22:48:13] INFO     binance_bot — 💼 Баланс: 4999.9055 USDT
+[2026-04-06 22:48:13] INFO     binance_bot — 📂 Відкритих позицій: 0
+[2026-04-06 22:48:13] INFO     binance_bot — 📊 Тестуємо отримання свічок для BTCUSDT…
+[2026-04-06 22:48:13] INFO     binance_bot — ✅ BTCUSDT остання ціна закриття: 69700.70 USDT
+[2026-04-06 22:48:13] INFO     binance_bot — ============================================================
+[2026-04-06 22:48:14] INFO     binance_bot — 🤖 Запуск Telegram бота…
+[2026-04-06 22:48:14] INFO     binance_bot — 🧵 Telegram бот запущено у фоновому потоці
+[2026-04-06 22:48:15] INFO     binance_bot — ✅ Telegram бот підключено — слухаємо команди
+[2026-04-06 22:48:15] DEBUG    binance_bot — BTCUSDT: 24h обсяг = 118951188225 USDT
+[2026-04-06 22:48:16] DEBUG    binance_bot — ETHUSDT: 24h обсяг = 98069700218 USDT
+[2026-04-06 22:48:16] DEBUG    binance_bot — SOLUSDT: 24h обсяг = 365380207 USDT
+[2026-04-06 22:48:16] INFO     binance_bot — 📊 Найактивніша пара: BTCUSDT (118951188225 USDT за 24г)
+[2026-04-06 22:48:16] INFO     binance_bot — 🎯 Активна пара: BTCUSDT | Всі пари: BTCUSDT, ETHUSDT, SOLUSDT
+[2026-04-06 22:48:16] INFO     binance_bot — 🔄 Запускаємо торговий цикл (інтервал: 60 сек)…
+[2026-04-06 22:48:16] INFO     binance_bot — ─── Скан #1 (19:48:16 UTC) ───
+[2026-04-06 22:48:16] INFO     binance_bot — 📌 Стартовий торговий баланс дня: 100.0000 USDT
+[2026-04-06 22:48:16] DEBUG    binance_bot — [BTCUSDT] LONG відхилено: EMA OK, RSI=52.1 OK, але MACD не перетинає вгору
+[2026-04-06 22:48:16] INFO     binance_bot — 📊 [BTCUSDT] Ціна=69708.10 | EMA21/EMA50 ⬆️ UP | RSI=52.1 | MACD diff=-8.6235 | → немає (LONG відхилено)
+[2026-04-06 22:48:17] DEBUG    binance_bot — [ETHUSDT] LONG відхилено: EMA OK, RSI=45.6 OK, але MACD не перетинає вгору
+[2026-04-06 22:48:17] INFO     binance_bot — 📊 [ETHUSDT] Ціна=2139.14 | EMA21/EMA50 ⬆️ UP | RSI=45.6 | MACD diff=-0.7336 | → немає (LONG відхилено)
+[2026-04-06 22:48:17] DEBUG    binance_bot — [SOLUSDT] SHORT відхилено: EMA OK, RSI=43.9 OK, але MACD не перетинає вниз
+[2026-04-06 22:48:17] INFO     binance_bot — 📊 [SOLUSDT] Ціна=81.68 | EMA21/EMA50 ⬇️ DOWN | RSI=43.9 | MACD diff=-0.0026 | → немає (SHORT відхилено)
+[2026-04-06 22:48:34] INFO     binance_bot — Отримано сигнал завершення (2) — зупиняємо…
+[2026-04-06 22:48:35] INFO     binance_bot — 🛑 Бот зупиняється… Закриваємо позиції…
+[2026-04-06 22:48:35] INFO     binance_bot — Немає відкритих позицій
+[2026-04-06 22:48:35] INFO     binance_bot — 👋 Бот завершив роботу
+[2026-04-06 22:48:47] INFO     binance_bot — 🔧 Режим: TESTNET (https://testnet.binancefuture.com)
+[2026-04-06 22:48:48] INFO     binance_bot — ============================================================
+[2026-04-06 22:48:48] INFO     binance_bot — 🤖 Binance Futures Bot стартує…
+[2026-04-06 22:48:48] INFO     binance_bot — Режим: 🔧 TESTNET
+[2026-04-06 22:48:48] INFO     binance_bot — Пари: BNBUSDT, XRPUSDT, SOLUSDT, ETHUSDT, AVAXUSDT
+[2026-04-06 22:48:48] INFO     binance_bot — Таймфрейм: 15m | Плече: x5 | Ризик/угода: 2%
+[2026-04-06 22:48:48] INFO     binance_bot — ============================================================
+[2026-04-06 22:48:49] INFO     binance_bot — ✅ З'єднання з Binance API встановлено
+[2026-04-06 22:48:49] INFO     binance_bot — 💼 Баланс: 4999.9055 USDT
+[2026-04-06 22:48:49] INFO     binance_bot — 📂 Відкритих позицій: 0
+[2026-04-06 22:48:49] INFO     binance_bot — 📊 Тестуємо отримання свічок для BTCUSDT…
+[2026-04-06 22:48:50] INFO     binance_bot — ✅ BTCUSDT остання ціна закриття: 69675.60 USDT
+[2026-04-06 22:48:50] INFO     binance_bot — ============================================================
+[2026-04-06 22:48:50] INFO     binance_bot — 🤖 Запуск Telegram бота…
+[2026-04-06 22:48:50] INFO     binance_bot — 🧵 Telegram бот запущено у фоновому потоці
+[2026-04-06 22:48:51] INFO     binance_bot — ✅ Telegram бот підключено — слухаємо команди
+[2026-04-06 22:48:51] DEBUG    binance_bot — BNBUSDT: 24h обсяг = 63007938515 USDT
+[2026-04-06 22:48:52] DEBUG    binance_bot — XRPUSDT: 24h обсяг = 66900084190 USDT
+[2026-04-06 22:48:52] DEBUG    binance_bot — SOLUSDT: 24h обсяг = 365381909 USDT
+[2026-04-06 22:48:52] DEBUG    binance_bot — ETHUSDT: 24h обсяг = 98074426730 USDT
+[2026-04-06 22:48:53] DEBUG    binance_bot — AVAXUSDT: 24h обсяг = 274657774 USDT
+[2026-04-06 22:48:53] INFO     binance_bot — 📊 Найактивніша пара: ETHUSDT (98074426730 USDT за 24г)
+[2026-04-06 22:48:53] INFO     binance_bot — 🎯 Активна пара: ETHUSDT | Всі пари: BNBUSDT, XRPUSDT, SOLUSDT, ETHUSDT, AVAXUSDT
+[2026-04-06 22:48:53] INFO     binance_bot — 🔄 Запускаємо торговий цикл (інтервал: 60 сек)…
+[2026-04-06 22:48:53] INFO     binance_bot — ─── Скан #1 (19:48:53 UTC) ───
+[2026-04-06 22:48:53] INFO     binance_bot — 📌 Стартовий торговий баланс дня: 100.0000 USDT
+[2026-04-06 22:48:53] DEBUG    binance_bot — [BNBUSDT] LONG відхилено: EMA OK, RSI=52.9 OK, але MACD не перетинає вгору
+[2026-04-06 22:48:53] INFO     binance_bot — 📊 [BNBUSDT] Ціна=606.90 | EMA21/EMA50 ⬆️ UP | RSI=52.9 | MACD diff=0.0203 | → немає (LONG відхилено)
+[2026-04-06 22:48:53] DEBUG    binance_bot — [XRPUSDT] SHORT відхилено: EMA OK, RSI=42.5 OK, але MACD не перетинає вниз
+[2026-04-06 22:48:53] INFO     binance_bot — 📊 [XRPUSDT] Ціна=1.34 | EMA21/EMA50 ⬇️ DOWN | RSI=42.5 | MACD diff=-0.0003 | → немає (SHORT відхилено)
+[2026-04-06 22:48:54] DEBUG    binance_bot — [SOLUSDT] SHORT відхилено: EMA OK, RSI=43.2 OK, але MACD не перетинає вниз
+[2026-04-06 22:48:54] INFO     binance_bot — 📊 [SOLUSDT] Ціна=81.65 | EMA21/EMA50 ⬇️ DOWN | RSI=43.2 | MACD diff=-0.0045 | → немає (SHORT відхилено)
+[2026-04-06 22:48:54] DEBUG    binance_bot — [ETHUSDT] LONG відхилено: EMA OK, RSI=45.5 OK, але MACD не перетинає вгору
+[2026-04-06 22:48:54] INFO     binance_bot — 📊 [ETHUSDT] Ціна=2139.11 | EMA21/EMA50 ⬆️ UP | RSI=45.5 | MACD diff=-0.7356 | → немає (LONG відхилено)
+[2026-04-06 22:48:54] INFO     binance_bot — ✅ [AVAXUSDT] SHORT: EMA21=9.34 < EMA50=9.35, RSI=38.6, MACD перетнув вниз
+[2026-04-06 22:48:54] INFO     binance_bot — 📊 [AVAXUSDT] Ціна=9.30 | EMA21/EMA50 ⬇️ DOWN | RSI=38.6 | MACD diff=-0.0007 | → SHORT
+[2026-04-06 22:48:55] INFO     binance_bot — 💼 Баланс: 4999.9055 USDT
+[2026-04-06 22:48:55] INFO     binance_bot — 🔒 Баланс обмежено: реальний=4999.91 USDT → торговий=100.00 USDT
+[2026-04-06 22:48:56] DEBUG    binance_bot — AVAXUSDT фільтри: stepSize=1.0 minQty=1.0 precision=0
+[2026-04-06 22:48:56] INFO     binance_bot — 📐 [AVAXUSDT] SHORT qty=1.0000 | TP=9.16 | SL=9.37 | Ризик=2.00 USDT
+[2026-04-06 22:48:56] DEBUG    binance_bot — AVAXUSDT: тип маржі вже ISOLATED
+[2026-04-06 22:48:56] DEBUG    binance_bot — AVAXUSDT: плече x5 ISOLATED встановлено
+[2026-04-06 22:48:57] INFO     binance_bot — 📥 [AVAXUSDT] SHORT відкрито: qty=1.0000 @ 9.30 USDT | orderId=190245947
+[2026-04-06 22:48:57] DEBUG    binance_bot — [AVAXUSDT] SL не виставлено на біржі (APIError(code=-4120): Order type not supported for this endpoint. Please use the Algo Order API endpoints instead.) — soft monitoring активний
+[2026-04-06 22:48:57] DEBUG    binance_bot — [AVAXUSDT] TP не виставлено на біржі (APIError(code=-4120): Order type not supported for this endpoint. Please use the Algo Order API endpoints instead.) — soft monitoring активний
+[2026-04-06 22:48:57] INFO     binance_bot — [AVAXUSDT] 🔁 SL/TP моніторяться ботом: SL=9.37 | TP=9.16 (перевірка щохвилини)
+[2026-04-06 22:48:57] INFO     binance_bot — ✅ [AVAXUSDT] SHORT | Вхід: 9.30 | TP: 9.16 | SL: 9.37 | qty: 1.0000
+[2026-04-06 22:48:57] DEBUG    binance_bot — Надсилаємо Telegram (відкриття): AVAXUSDT
+[2026-04-06 22:49:58] INFO     binance_bot — ─── Скан #2 (19:49:58 UTC) ───
+[2026-04-06 22:49:59] INFO     binance_bot — 📌 [AVAXUSDT] SHORT | Ціна=9.30 | TP=9.16 | SL=9.37 | P&L=-0.02%
+[2026-04-06 22:49:59] DEBUG    binance_bot — [BNBUSDT] LONG відхилено: EMA OK, RSI=52.9 OK, але MACD не перетинає вгору
+[2026-04-06 22:49:59] DEBUG    binance_bot — [XRPUSDT] SHORT відхилено: EMA OK, RSI=42.5 OK, але MACD не перетинає вниз
+[2026-04-06 22:50:00] DEBUG    binance_bot — [SOLUSDT] SHORT відхилено: EMA OK, RSI=44.2 OK, але MACD не перетинає вниз
+[2026-04-06 22:50:00] DEBUG    binance_bot — [ETHUSDT] LONG відхилено: EMA OK, RSI=45.6 OK, але MACD не перетинає вгору
+[2026-04-06 22:50:00] INFO     binance_bot — ✅ [AVAXUSDT] SHORT: EMA21=9.34 < EMA50=9.35, RSI=39.1, MACD перетнув вниз
+[2026-04-06 22:50:01] DEBUG    binance_bot — AVAXUSDT: вже є відкрита позиція (-1)
+[2026-04-06 22:50:01] INFO     binance_bot — [AVAXUSDT] Позиція вже відкрита — пропускаємо
+[2026-04-06 22:51:01] INFO     binance_bot — ─── Скан #3 (19:51:01 UTC) ───
+[2026-04-06 22:51:01] INFO     binance_bot — 📌 [AVAXUSDT] SHORT | Ціна=9.30 | TP=9.16 | SL=9.37 | P&L=-0.02%
+[2026-04-06 22:51:01] DEBUG    binance_bot — [BNBUSDT] LONG відхилено: EMA OK, RSI=52.9 OK, але MACD не перетинає вгору
+[2026-04-06 22:51:02] DEBUG    binance_bot — [XRPUSDT] SHORT відхилено: EMA OK, RSI=42.5 OK, але MACD не перетинає вниз
+[2026-04-06 22:51:02] DEBUG    binance_bot — [SOLUSDT] SHORT відхилено: EMA OK, RSI=44.2 OK, але MACD не перетинає вниз
+[2026-04-06 22:51:02] DEBUG    binance_bot — [ETHUSDT] LONG відхилено: EMA OK, RSI=45.5 OK, але MACD не перетинає вгору
+[2026-04-06 22:51:03] INFO     binance_bot — ✅ [AVAXUSDT] SHORT: EMA21=9.34 < EMA50=9.35, RSI=39.0, MACD перетнув вниз
+[2026-04-06 22:51:03] DEBUG    binance_bot — AVAXUSDT: вже є відкрита позиція (-1)
+[2026-04-06 22:51:03] INFO     binance_bot — [AVAXUSDT] Позиція вже відкрита — пропускаємо
+[2026-04-06 22:52:03] INFO     binance_bot — ─── Скан #4 (19:52:03 UTC) ───
+[2026-04-06 22:52:03] INFO     binance_bot — 📌 [AVAXUSDT] SHORT | Ціна=9.30 | TP=9.16 | SL=9.37 | P&L=-0.04%
+[2026-04-06 22:52:04] DEBUG    binance_bot — [BNBUSDT] LONG відхилено: EMA OK, RSI=53.4 OK, але MACD не перетинає вгору
+[2026-04-06 22:52:04] DEBUG    binance_bot — [XRPUSDT] SHORT відхилено: EMA OK, RSI=42.5 OK, але MACD не перетинає вниз
+[2026-04-06 22:52:04] DEBUG    binance_bot — [SOLUSDT] SHORT відхилено: EMA OK, RSI=43.2 OK, але MACD не перетинає вниз
+[2026-04-06 22:52:05] DEBUG    binance_bot — [ETHUSDT] LONG відхилено: EMA OK, RSI=45.5 OK, але MACD не перетинає вгору
+[2026-04-06 22:52:05] INFO     binance_bot — ✅ [AVAXUSDT] SHORT: EMA21=9.34 < EMA50=9.35, RSI=39.3, MACD перетнув вниз
+[2026-04-06 22:52:05] DEBUG    binance_bot — AVAXUSDT: вже є відкрита позиція (-1)
+[2026-04-06 22:52:05] INFO     binance_bot — [AVAXUSDT] Позиція вже відкрита — пропускаємо
+[2026-04-06 22:53:05] INFO     binance_bot — ─── Скан #5 (19:53:05 UTC) ───
+[2026-04-06 22:53:06] INFO     binance_bot — 📌 [AVAXUSDT] SHORT | Ціна=9.30 | TP=9.16 | SL=9.37 | P&L=-0.06%
+[2026-04-06 22:53:07] DEBUG    binance_bot — [BNBUSDT] LONG відхилено: EMA OK, RSI=53.4 OK, але MACD не перетинає вгору
+[2026-04-06 22:53:07] INFO     binance_bot — 📊 [BNBUSDT] Ціна=606.99 | EMA21/EMA50 ⬆️ UP | RSI=53.4 | MACD diff=0.0260 | → немає (LONG відхилено)
+[2026-04-06 22:53:07] DEBUG    binance_bot — [XRPUSDT] SHORT відхилено: EMA OK, RSI=42.3 OK, але MACD не перетинає вниз
+[2026-04-06 22:53:07] INFO     binance_bot — 📊 [XRPUSDT] Ціна=1.34 | EMA21/EMA50 ⬇️ DOWN | RSI=42.3 | MACD diff=-0.0004 | → немає (SHORT відхилено)
+[2026-04-06 22:53:07] DEBUG    binance_bot — [SOLUSDT] SHORT відхилено: EMA OK, RSI=43.2 OK, але MACD не перетинає вниз
+[2026-04-06 22:53:07] INFO     binance_bot — 📊 [SOLUSDT] Ціна=81.65 | EMA21/EMA50 ⬇️ DOWN | RSI=43.2 | MACD diff=-0.0045 | → немає (SHORT відхилено)
+[2026-04-06 22:53:07] DEBUG    binance_bot — [ETHUSDT] LONG відхилено: EMA OK, RSI=46.0 OK, але MACD не перетинає вгору
+[2026-04-06 22:53:07] INFO     binance_bot — 📊 [ETHUSDT] Ціна=2139.71 | EMA21/EMA50 ⬆️ UP | RSI=46.0 | MACD diff=-0.6973 | → немає (LONG відхилено)
+[2026-04-06 22:53:08] INFO     binance_bot — ✅ [AVAXUSDT] SHORT: EMA21=9.34 < EMA50=9.35, RSI=39.0, MACD перетнув вниз
+[2026-04-06 22:53:08] INFO     binance_bot — 📊 [AVAXUSDT] Ціна=9.30 | EMA21/EMA50 ⬇️ DOWN | RSI=39.0 | MACD diff=-0.0006 | → SHORT
+[2026-04-06 22:53:08] DEBUG    binance_bot — AVAXUSDT: вже є відкрита позиція (-1)
+[2026-04-06 22:53:08] INFO     binance_bot — [AVAXUSDT] Позиція вже відкрита — пропускаємо
+[2026-04-06 22:54:08] INFO     binance_bot — ─── Скан #6 (19:54:08 UTC) ───
+[2026-04-06 22:54:09] INFO     binance_bot — 📌 [AVAXUSDT] SHORT | Ціна=9.32 | TP=9.16 | SL=9.37 | P&L=-0.18%
+[2026-04-06 22:54:09] DEBUG    binance_bot — [BNBUSDT] LONG відхилено: EMA OK, RSI=52.9 OK, але MACD не перетинає вгору
+[2026-04-06 22:54:09] DEBUG    binance_bot — [XRPUSDT] SHORT відхилено: EMA OK, RSI=42.3 OK, але MACD не перетинає вниз
+[2026-04-06 22:54:10] DEBUG    binance_bot — [SOLUSDT] SHORT відхилено: EMA OK, RSI=43.9 OK, але MACD не перетинає вниз
+[2026-04-06 22:54:10] DEBUG    binance_bot — [ETHUSDT] LONG відхилено: EMA OK, RSI=46.0 OK, але MACD не перетинає вгору
+[2026-04-06 22:54:11] DEBUG    binance_bot — [AVAXUSDT] SHORT відхилено: EMA OK, RSI=42.7 OK, але MACD не перетинає вниз
+[2026-04-06 22:55:11] INFO     binance_bot — ─── Скан #7 (19:55:11 UTC) ───
+[2026-04-06 22:55:11] INFO     binance_bot — 📌 [AVAXUSDT] SHORT | Ціна=9.31 | TP=9.16 | SL=9.37 | P&L=-0.11%
+[2026-04-06 22:55:11] DEBUG    binance_bot — [BNBUSDT] LONG відхилено: EMA OK, RSI=52.9 OK, але MACD не перетинає вгору
+[2026-04-06 22:55:12] DEBUG    binance_bot — [XRPUSDT] LONG відхилено: EMA OK, RSI=44.5 OK, але MACD не перетинає вгору
+[2026-04-06 22:55:12] DEBUG    binance_bot — [SOLUSDT] SHORT відхилено: EMA OK, RSI=43.2 OK, але MACD не перетинає вниз
+[2026-04-06 22:55:12] DEBUG    binance_bot — [ETHUSDT] LONG відхилено: EMA OK, RSI=45.9 OK, але MACD не перетинає вгору
+[2026-04-06 22:55:13] INFO     binance_bot — ✅ [AVAXUSDT] SHORT: EMA21=9.34 < EMA50=9.35, RSI=40.8, MACD перетнув вниз
+[2026-04-06 22:55:13] DEBUG    binance_bot — AVAXUSDT: вже є відкрита позиція (-1)
+[2026-04-06 22:55:13] INFO     binance_bot — [AVAXUSDT] Позиція вже відкрита — пропускаємо
+[2026-04-06 22:56:13] INFO     binance_bot — ─── Скан #8 (19:56:13 UTC) ───
+[2026-04-06 22:56:13] INFO     binance_bot — 📌 [AVAXUSDT] SHORT | Ціна=9.31 | TP=9.16 | SL=9.37 | P&L=-0.11%
+[2026-04-06 22:56:14] DEBUG    binance_bot — [BNBUSDT] LONG відхилено: EMA OK, RSI=55.0 OK, але MACD не перетинає вгору
+[2026-04-06 22:56:14] DEBUG    binance_bot — [XRPUSDT] LONG відхилено: EMA OK, RSI=44.9 OK, але MACD не перетинає вгору
+[2026-04-06 22:56:14] DEBUG    binance_bot — [SOLUSDT] SHORT відхилено: EMA OK, RSI=42.9 OK, але MACD не перетинає вниз
+[2026-04-06 22:56:15] DEBUG    binance_bot — [ETHUSDT] LONG відхилено: EMA OK, RSI=45.9 OK, але MACD не перетинає вгору
+[2026-04-06 22:56:15] INFO     binance_bot — ✅ [AVAXUSDT] SHORT: EMA21=9.34 < EMA50=9.35, RSI=40.8, MACD перетнув вниз
+[2026-04-06 22:56:15] DEBUG    binance_bot — AVAXUSDT: вже є відкрита позиція (-1)
+[2026-04-06 22:56:15] INFO     binance_bot — [AVAXUSDT] Позиція вже відкрита — пропускаємо
+[2026-04-06 22:57:15] INFO     binance_bot — ─── Скан #9 (19:57:15 UTC) ───
+[2026-04-06 22:57:16] INFO     binance_bot — 📌 [AVAXUSDT] SHORT | Ціна=9.31 | TP=9.16 | SL=9.37 | P&L=-0.11%
+[2026-04-06 22:57:16] DEBUG    binance_bot — [BNBUSDT] LONG відхилено: EMA OK, RSI=53.9 OK, але MACD не перетинає вгору
+[2026-04-06 22:57:16] DEBUG    binance_bot — [XRPUSDT] LONG відхилено: EMA OK, RSI=42.8 OK, але MACD не перетинає вгору
+[2026-04-06 22:57:17] DEBUG    binance_bot — [SOLUSDT] SHORT відхилено: EMA OK, RSI=42.9 OK, але MACD не перетинає вниз
+[2026-04-06 22:57:17] DEBUG    binance_bot — [ETHUSDT] LONG відхилено: EMA OK, RSI=47.2 OK, але MACD не перетинає вгору
+[2026-04-06 22:57:17] INFO     binance_bot — ✅ [AVAXUSDT] SHORT: EMA21=9.34 < EMA50=9.35, RSI=40.8, MACD перетнув вниз
+[2026-04-06 22:57:18] DEBUG    binance_bot — AVAXUSDT: вже є відкрита позиція (-1)
+[2026-04-06 22:57:18] INFO     binance_bot — [AVAXUSDT] Позиція вже відкрита — пропускаємо
+[2026-04-06 22:58:18] INFO     binance_bot — ─── Скан #10 (19:58:18 UTC) ───
+[2026-04-06 22:58:18] INFO     binance_bot — 📌 [AVAXUSDT] SHORT | Ціна=9.31 | TP=9.16 | SL=9.37 | P&L=-0.11%
+[2026-04-06 22:58:18] DEBUG    binance_bot — [BNBUSDT] LONG відхилено: EMA OK, RSI=53.9 OK, але MACD не перетинає вгору
+[2026-04-06 22:58:18] INFO     binance_bot — 📊 [BNBUSDT] Ціна=607.09 | EMA21/EMA50 ⬆️ UP | RSI=53.9 | MACD diff=0.0324 | → немає (LONG відхилено)
+[2026-04-06 22:58:19] DEBUG    binance_bot — [XRPUSDT] SHORT відхилено: EMA OK, RSI=42.2 OK, але MACD не перетинає вниз
+[2026-04-06 22:58:19] INFO     binance_bot — 📊 [XRPUSDT] Ціна=1.34 | EMA21/EMA50 ⬇️ DOWN | RSI=42.2 | MACD diff=-0.0004 | → немає (SHORT відхилено)
+[2026-04-06 22:58:19] DEBUG    binance_bot — [SOLUSDT] SHORT відхилено: EMA OK, RSI=42.9 OK, але MACD не перетинає вниз
+[2026-04-06 22:58:19] INFO     binance_bot — 📊 [SOLUSDT] Ціна=81.64 | EMA21/EMA50 ⬇️ DOWN | RSI=42.9 | MACD diff=-0.0052 | → немає (SHORT відхилено)
+[2026-04-06 22:58:19] DEBUG    binance_bot — [ETHUSDT] LONG відхилено: EMA OK, RSI=47.2 OK, але MACD не перетинає вгору
+[2026-04-06 22:58:19] INFO     binance_bot — 📊 [ETHUSDT] Ціна=2141.08 | EMA21/EMA50 ⬆️ UP | RSI=47.2 | MACD diff=-0.6098 | → немає (LONG відхилено)
+[2026-04-06 22:58:20] DEBUG    binance_bot — [AVAXUSDT] SHORT відхилено: EMA OK, RSI=41.1 OK, але MACD не перетинає вниз
+[2026-04-06 22:58:20] INFO     binance_bot — 📊 [AVAXUSDT] Ціна=9.31 | EMA21/EMA50 ⬇️ DOWN | RSI=41.1 | MACD diff=0.0000 | → немає (SHORT відхилено)
+[2026-04-06 22:59:20] INFO     binance_bot — ─── Скан #11 (19:59:20 UTC) ───
+[2026-04-06 22:59:20] INFO     binance_bot — 📌 [AVAXUSDT] SHORT | Ціна=9.32 | TP=9.16 | SL=9.37 | P&L=-0.25%
+[2026-04-06 22:59:20] DEBUG    binance_bot — [BNBUSDT] LONG відхилено: EMA OK, RSI=53.6 OK, але MACD не перетинає вгору
+[2026-04-06 22:59:21] DEBUG    binance_bot — [XRPUSDT] SHORT відхилено: EMA OK, RSI=42.2 OK, але MACD не перетинає вниз
+[2026-04-06 22:59:21] DEBUG    binance_bot — [SOLUSDT] SHORT відхилено: EMA OK, RSI=42.9 OK, але MACD не перетинає вниз
+[2026-04-06 22:59:21] DEBUG    binance_bot — [ETHUSDT] LONG відхилено: EMA OK, RSI=47.0 OK, але MACD не перетинає вгору
+[2026-04-06 22:59:22] DEBUG    binance_bot — [AVAXUSDT] SHORT відхилено: EMA OK, RSI=41.1 OK, але MACD не перетинає вниз
+[2026-04-06 22:59:49] INFO     binance_bot — Отримано сигнал завершення (2) — зупиняємо…
+[2026-04-06 22:59:50] INFO     binance_bot — 🛑 Бот зупиняється… Закриваємо позиції…
+[2026-04-06 22:59:50] INFO     binance_bot — Закриваємо AVAXUSDT (завершення роботи бота)…
+[2026-04-06 22:59:51] INFO     binance_bot — 💹 Денний P&L: 0.0000 USDT
+[2026-04-06 22:59:51] INFO     binance_bot — 🔴 [AVAXUSDT] Позиція закрита (завершення роботи бота) | Вхід: 9.30 → Вихід: 0.00 | P&L: 0.0000 USDT (0.00%)
+[2026-04-06 22:59:52] INFO     binance_bot — 👋 Бот завершив роботу
+[2026-04-06 23:04:27] INFO     binance_bot — 🔧 Режим: TESTNET (https://testnet.binancefuture.com)
+[2026-04-06 23:04:28] INFO     binance_bot — ============================================================
+[2026-04-06 23:04:28] INFO     binance_bot — 🤖 Binance Futures Bot стартує…
+[2026-04-06 23:04:28] INFO     binance_bot — Режим: 🔧 TESTNET
+[2026-04-06 23:04:28] INFO     binance_bot — Пари: BNBUSDT, XRPUSDT, SOLUSDT, ETHUSDT, AVAXUSDT
+[2026-04-06 23:04:28] INFO     binance_bot — Таймфрейм: 15m | Плече: x5 | Ризик/угода: 2%
+[2026-04-06 23:04:28] INFO     binance_bot — ============================================================
+[2026-04-06 23:04:29] INFO     binance_bot — ✅ З'єднання з Binance API встановлено
+[2026-04-06 23:04:29] INFO     binance_bot — 💼 Баланс: 4999.8720 USDT
+[2026-04-06 23:04:29] INFO     binance_bot — 📂 Відкритих позицій: 0
+[2026-04-06 23:04:29] INFO     binance_bot — 📊 Тестуємо отримання свічок для BTCUSDT…
+[2026-04-06 23:04:30] INFO     binance_bot — ✅ BTCUSDT остання ціна закриття: 69620.90 USDT
+[2026-04-06 23:04:30] INFO     binance_bot — ============================================================
+[2026-04-06 23:04:30] INFO     binance_bot — 🤖 Запуск Telegram бота…
+[2026-04-06 23:04:30] INFO     binance_bot — 🧵 Telegram бот запущено у фоновому потоці
+[2026-04-06 23:04:31] INFO     binance_bot — ✅ Telegram бот підключено — слухаємо команди
+[2026-04-06 23:04:32] DEBUG    binance_bot — BNBUSDT: 24h обсяг = 63458214624 USDT
+[2026-04-06 23:04:32] DEBUG    binance_bot — XRPUSDT: 24h обсяг = 67340356445 USDT
+[2026-04-06 23:04:32] DEBUG    binance_bot — SOLUSDT: 24h обсяг = 365341419 USDT
+[2026-04-06 23:04:32] DEBUG    binance_bot — ETHUSDT: 24h обсяг = 98110514527 USDT
+[2026-04-06 23:04:33] DEBUG    binance_bot — AVAXUSDT: 24h обсяг = 274796852 USDT
+[2026-04-06 23:04:33] INFO     binance_bot — 📊 Найактивніша пара: ETHUSDT (98110514527 USDT за 24г)
+[2026-04-06 23:04:33] INFO     binance_bot — 🎯 Активна пара: ETHUSDT | Всі пари: BNBUSDT, XRPUSDT, SOLUSDT, ETHUSDT, AVAXUSDT
+[2026-04-06 23:04:33] INFO     binance_bot — 🔄 Запускаємо торговий цикл (інтервал: 60 сек)…
+[2026-04-06 23:04:33] INFO     binance_bot — ─── Скан #1 (20:04:33 UTC) ───
+[2026-04-06 23:04:33] INFO     binance_bot — 📌 Стартовий торговий баланс дня: 100.0000 USDT
+[2026-04-06 23:04:33] DEBUG    binance_bot — [BNBUSDT] LONG відхилено: EMA OK, RSI=54.7 OK, але MACD не перетинає вгору
+[2026-04-06 23:04:33] INFO     binance_bot — 📊 [BNBUSDT] Ціна=607.28 | EMA21/EMA50 ⬆️ UP | RSI=54.7 | MACD diff=0.0687 | → немає (LONG відхилено)
+[2026-04-06 23:04:34] DEBUG    binance_bot — [XRPUSDT] LONG відхилено: EMA OK, RSI=48.4 OK, але MACD не перетинає вгору
+[2026-04-06 23:04:34] INFO     binance_bot — 📊 [XRPUSDT] Ціна=1.34 | EMA21/EMA50 ⬆️ UP | RSI=48.4 | MACD diff=-0.0000 | → немає (LONG відхилено)
+[2026-04-06 23:04:34] DEBUG    binance_bot — [SOLUSDT] SHORT відхилено: EMA OK, RSI=47.9 OK, але MACD не перетинає вниз
+[2026-04-06 23:04:34] INFO     binance_bot — 📊 [SOLUSDT] Ціна=81.81 | EMA21/EMA50 ⬇️ DOWN | RSI=47.9 | MACD diff=0.0090 | → немає (SHORT відхилено)
+[2026-04-06 23:04:34] DEBUG    binance_bot — [ETHUSDT] LONG відхилено: EMA OK, RSI=47.1 OK, але MACD не перетинає вгору
+[2026-04-06 23:04:34] INFO     binance_bot — 📊 [ETHUSDT] Ціна=2140.92 | EMA21/EMA50 ⬆️ UP | RSI=47.1 | MACD diff=-0.3353 | → немає (LONG відхилено)
+[2026-04-06 23:04:35] DEBUG    binance_bot — [AVAXUSDT] SHORT відхилено: EMA OK, RSI=42.7 OK, але MACD не перетинає вниз
+[2026-04-06 23:04:35] INFO     binance_bot — 📊 [AVAXUSDT] Ціна=9.31 | EMA21/EMA50 ⬇️ DOWN | RSI=42.7 | MACD diff=0.0009 | → немає (SHORT відхилено)
+[2026-04-06 23:05:35] INFO     binance_bot — ─── Скан #2 (20:05:35 UTC) ───
+[2026-04-06 23:05:35] DEBUG    binance_bot — [BNBUSDT] LONG відхилено: EMA OK, RSI=54.7 OK, але MACD не перетинає вгору
+[2026-04-06 23:05:36] DEBUG    binance_bot — [XRPUSDT] LONG відхилено: EMA OK, RSI=48.2 OK, але MACD не перетинає вгору
+[2026-04-06 23:05:36] DEBUG    binance_bot — [SOLUSDT] SHORT відхилено: EMA OK, RSI=47.9 OK, але MACD не перетинає вниз
+[2026-04-06 23:05:36] DEBUG    binance_bot — [ETHUSDT] LONG відхилено: EMA OK, RSI=47.1 OK, але MACD не перетинає вгору
+[2026-04-06 23:05:37] DEBUG    binance_bot — [AVAXUSDT] SHORT відхилено: EMA OK, RSI=44.5 OK, але MACD не перетинає вниз
+[2026-04-06 23:06:37] INFO     binance_bot — ─── Скан #3 (20:06:37 UTC) ───
+[2026-04-06 23:06:37] DEBUG    binance_bot — [BNBUSDT] LONG відхилено: EMA OK, RSI=54.9 OK, але MACD не перетинає вгору
+[2026-04-06 23:06:37] INFO     binance_bot — ✅ [XRPUSDT] LONG: EMA21=1.34 > EMA50=1.34, RSI=48.6, MACD перетнув вгору
+[2026-04-06 23:06:38] INFO     binance_bot — 💼 Баланс: 4999.8720 USDT
+[2026-04-06 23:06:38] INFO     binance_bot — 🔒 Баланс обмежено: реальний=4999.87 USDT → торговий=100.00 USDT
+[2026-04-06 23:06:38] DEBUG    binance_bot — XRPUSDT фільтри: stepSize=0.1 minQty=0.1 precision=1
+[2026-04-06 23:06:38] INFO     binance_bot — 📐 [XRPUSDT] LONG qty=7.4000 | TP=1.36 | SL=1.33 | Ризик=2.00 USDT
+[2026-04-06 23:06:39] DEBUG    binance_bot — XRPUSDT: плече x5 ISOLATED встановлено
+[2026-04-06 23:06:39] INFO     binance_bot — 📥 [XRPUSDT] LONG відкрито: qty=7.4000 @ 1.34 USDT | orderId=1594342012
+[2026-04-06 23:06:40] DEBUG    binance_bot — [XRPUSDT] SL не виставлено на біржі (APIError(code=-4120): Order type not supported for this endpoint. Please use the Algo Order API endpoints instead.) — soft monitoring активний
+[2026-04-06 23:06:40] DEBUG    binance_bot — [XRPUSDT] TP не виставлено на біржі (APIError(code=-4120): Order type not supported for this endpoint. Please use the Algo Order API endpoints instead.) — soft monitoring активний
+[2026-04-06 23:06:40] INFO     binance_bot — [XRPUSDT] 🔁 SL/TP моніторяться ботом: SL=1.33 | TP=1.36 (перевірка щохвилини)
+[2026-04-06 23:06:40] INFO     binance_bot — ✅ [XRPUSDT] LONG | Вхід: 1.34 | TP: 1.36 | SL: 1.33 | qty: 7.4000
+[2026-04-06 23:06:40] DEBUG    binance_bot — Надсилаємо Telegram (відкриття): XRPUSDT
+[2026-04-06 23:06:41] DEBUG    binance_bot — [SOLUSDT] SHORT відхилено: EMA OK, RSI=50.6 OK, але MACD не перетинає вниз
+[2026-04-06 23:06:42] DEBUG    binance_bot — [ETHUSDT] LONG відхилено: EMA OK, RSI=48.1 OK, але MACD не перетинає вгору
+[2026-04-06 23:06:42] DEBUG    binance_bot — [AVAXUSDT] SHORT відхилено: EMA OK, RSI=44.5 OK, але MACD не перетинає вниз
+[2026-04-06 23:07:42] INFO     binance_bot — ─── Скан #4 (20:07:42 UTC) ───
+[2026-04-06 23:07:43] INFO     binance_bot — 📌 [XRPUSDT] LONG | Ціна=1.34 | TP=1.36 | SL=1.33 | P&L=0.07%
+[2026-04-06 23:07:43] DEBUG    binance_bot — [BNBUSDT] LONG відхилено: EMA OK, RSI=54.9 OK, але MACD не перетинає вгору
+[2026-04-06 23:07:43] DEBUG    binance_bot — [XRPUSDT] LONG відхилено: EMA OK, RSI=48.4 OK, але MACD не перетинає вгору
+[2026-04-06 23:07:43] DEBUG    binance_bot — [SOLUSDT] SHORT відхилено: EMA OK, RSI=50.3 OK, але MACD не перетинає вниз
+[2026-04-06 23:07:44] DEBUG    binance_bot — [ETHUSDT] LONG відхилено: EMA OK, RSI=48.1 OK, але MACD не перетинає вгору
+[2026-04-06 23:07:44] DEBUG    binance_bot — [AVAXUSDT] SHORT відхилено: EMA OK, RSI=43.8 OK, але MACD не перетинає вниз
+[2026-04-06 23:08:11] INFO     binance_bot — Отримано сигнал завершення (2) — зупиняємо…
+[2026-04-06 23:08:12] INFO     binance_bot — 🛑 Бот зупиняється… Закриваємо позиції…
+[2026-04-06 23:08:12] INFO     binance_bot — Закриваємо XRPUSDT (завершення роботи бота)…
+[2026-04-06 23:08:13] INFO     binance_bot — 💹 Денний P&L: 0.0000 USDT
+[2026-04-06 23:08:13] INFO     binance_bot — 🔴 [XRPUSDT] Позиція закрита (завершення роботи бота) | Вхід: 1.34 → Вихід: 0.00 | P&L: 0.0000 USDT (0.00%)
+[2026-04-06 23:08:14] INFO     binance_bot — 👋 Бот завершив роботу

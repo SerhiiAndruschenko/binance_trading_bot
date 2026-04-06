@@ -139,10 +139,25 @@ class RiskManager:
         position_usdt = usdt_risk * config.LEVERAGE
         quantity = position_usdt / entry_price
 
-        # Округлення кількості залежно від символу
+        # Округлення кількості відповідно до stepSize з біржі
         quantity = self._round_quantity(symbol, quantity)
-        if quantity <= 0:
-            log.error("Розрахована кількість = 0 для %s", symbol)
+
+        # Перевірка мінімального розміру ордера
+        filters = binance.get_symbol_filters(symbol)
+        min_qty = filters["min_qty"]
+
+        if quantity <= 0 or quantity < min_qty:
+            min_notional = min_qty * entry_price / config.LEVERAGE
+            log.warning(
+                "⚠️  [%s] Угода пропущена: розрахована qty=%.6f < мінімум %.6f\n"
+                "    Щоб торгувати BTC потрібно мінімум ~%.0f USDT на балансі "
+                "(при ризику %.0f%% та плечі x%d).\n"
+                "    Поточний торговий баланс: %.2f USDT",
+                symbol, quantity, min_qty,
+                min_notional / config.RISK_PER_TRADE,
+                config.RISK_PER_TRADE * 100, config.LEVERAGE,
+                effective_balance,
+            )
             return None
 
         if signal == "LONG":
@@ -173,17 +188,16 @@ class RiskManager:
 
     def _round_quantity(self, symbol: str, quantity: float) -> float:
         """
-        Округлює кількість до допустимого кроку для символу.
-        Для BTC — 3 знаки після коми, ETH — 3, SOL — 1.
-        Для невідомих символів — 3 знаки.
+        Округлює кількість до stepSize отриманого з біржі.
+        Використовує floor (вниз) щоб не перевищити баланс.
         """
-        step_map = {
-            "BTCUSDT": 3,
-            "ETHUSDT": 3,
-            "SOLUSDT": 1,
-        }
-        decimals = step_map.get(symbol, 3)
-        return round(quantity, decimals)
+        import math
+        filters = binance.get_symbol_filters(symbol)
+        step = filters["step_size"]
+        prec = filters["qty_precision"]
+        # Floor до кроку: int(qty / step) * step
+        floored = math.floor(quantity / step) * step
+        return round(floored, prec)
 
     # ─── Перевірка відкритої позиції ──────────────────────────────────────────
 

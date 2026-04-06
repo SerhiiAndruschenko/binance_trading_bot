@@ -20,7 +20,7 @@ TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID: str   = os.getenv("TELEGRAM_CHAT_ID", "")
 
 # ─── Торгові пари ─────────────────────────────────────────────────────────────
-SYMBOLS: list[str] = ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
+SYMBOLS: list[str] = ["BNBUSDT", "XRPUSDT", "SOLUSDT", "ETHUSDT", "AVAXUSDT"]
 
 # ─── Стратегія ────────────────────────────────────────────────────────────────
 TIMEFRAME: str  = "15m"       # таймфрейм свічок
