@@ -68,6 +68,19 @@ def open_position(result: SignalResult) -> Optional[OpenTrade]:
         log.info("[%s] Позиція вже відкрита — пропускаємо", symbol)
         return None
 
+    # 2а. Глобальний ліміт відкритих позицій
+    try:
+        all_positions = binance.get_open_positions()
+        total_open = len(all_positions)
+        if total_open >= config.MAX_OPEN_TRADES_GLOBAL:
+            log.info(
+                "[%s] Пропуск: досягнуто глобальний ліміт %d позицій (зараз відкрито: %d)",
+                symbol, config.MAX_OPEN_TRADES_GLOBAL, total_open,
+            )
+            return None
+    except Exception as e:
+        log.warning("Не вдалося перевірити глобальний ліміт позицій: %s", e)
+
     # 2. Отримуємо баланс
     balance = binance.get_futures_balance()
     log.info("💼 Баланс: %.4f USDT", balance)

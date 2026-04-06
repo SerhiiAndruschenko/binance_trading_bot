@@ -22,7 +22,7 @@ from binance_client import binance
 from strategy import analyze, pick_most_active_symbol, Signal
 from trader import open_position, check_exit_by_signal, close_all_positions, check_sl_tp_all
 from risk_manager import risk_manager
-from notifications import notify_bot_started, notify_daily_limit_hit, notify_error
+from notifications import notify_bot_started, notify_error
 
 
 # ─── Graceful shutdown ────────────────────────────────────────────────────────
@@ -103,10 +103,9 @@ def scan_cycle(symbols: list[str], iteration: int) -> None:
         log.debug("Бот зупинено — пропускаємо цикл")
         return
 
-    # Денний ліміт
+    # Денний ліміт (сповіщення надсилається всередині check_daily_loss_limit)
     balance = binance.get_futures_balance()
     if not risk_manager.check_daily_loss_limit(balance):
-        notify_daily_limit_hit(risk_manager.daily_pnl, balance)
         log.warning("⛔️ Денний ліміт — бот зупиняється")
         bot_state.stop()
         return

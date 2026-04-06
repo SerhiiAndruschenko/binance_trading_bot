@@ -3,7 +3,7 @@ risk_manager.py — Управління ризиками: розмір пози
 """
 
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime, timezone
 from typing import Optional
 
 import config
@@ -34,61 +34,88 @@ class RiskManager:
 
     def __init__(self) -> None:
         self._daily_pnl: float = 0.0
-        self._daily_date: date = date.today()
-        self._start_balance: Optional[float] = None
+        self._daily_date: date = date.today()    # UTC-дата поточного дня
+        self._start_balance: Optional[float] = None   # баланс на початок дня
         self._is_stopped: bool = False
 
     # ─── Денний ліміт ─────────────────────────────────────────────────────────
 
-    def _reset_daily_if_needed(self) -> None:
-        today = date.today()
+    def _utc_today(self) -> date:
+        """Повертає поточну дату за UTC — скидання відбувається о 00:00 UTC."""
+        return datetime.now(timezone.utc).date()
+
+    def _reset_daily_if_needed(self, current_balance: float) -> None:
+        """
+        Перевіряє чи почався новий UTC-день.
+        Якщо так — скидає денний P&L і зберігає поточний баланс
+        як стартовий для нового дня.
+        """
+        today = self._utc_today()
         if today != self._daily_date:
-            log.info("📅 Новий день — скидаємо денний P&L")
-            self._daily_pnl = 0.0
-            self._daily_date = today
-            self._start_balance = None
-            self._is_stopped = False
+            prev = self._daily_date
+            self._daily_pnl    = 0.0
+            self._daily_date   = today
+            self._is_stopped   = False
+            # Стартовий баланс нового дня = фактичний баланс о 00:00 UTC
+            effective = current_balance
+            if config.MAX_TRADING_BALANCE > 0 and current_balance > config.MAX_TRADING_BALANCE:
+                effective = config.MAX_TRADING_BALANCE
+            self._start_balance = effective
+            log.info(
+                "📅 Новий день (%s → %s) | Стартовий баланс: %.2f USDT",
+                prev, today, self._start_balance,
+            )
 
     def record_trade_pnl(self, pnl_usdt: float) -> None:
         """Записує результат закритої угоди в денний P&L."""
-        self._reset_daily_if_needed()
         self._daily_pnl += pnl_usdt
-        log.info("💹 Денний P&L: %.4f USDT", self._daily_pnl)
+        log.info("💹 Денний P&L: %+.4f USDT", self._daily_pnl)
 
     def check_daily_loss_limit(self, current_balance: float) -> bool:
         """
-        Повертає True якщо денний ліміт збитків НЕ перевищено (можна торгувати).
-        Повертає False якщо треба зупинити бота.
-        Ліміт рахується від ефективного балансу (з урахуванням MAX_TRADING_BALANCE).
+        Повертає True якщо денний ліміт збитків НЕ перевищено.
+        Повертає False якщо бот має зупинитись.
+
+        Ліміт = DAILY_LOSS_LIMIT % від балансу на початок поточного UTC-дня.
+        При переході на новий день стартовий баланс оновлюється автоматично.
         """
-        self._reset_daily_if_needed()
+        # Перевірка і скидання при зміні дня (передаємо баланс для запису нового старту)
+        self._reset_daily_if_needed(current_balance)
 
         if self._is_stopped:
             return False
 
-        # Ефективний баланс з урахуванням ліміту
+        # Ефективний баланс з урахуванням MAX_TRADING_BALANCE
         effective_balance = current_balance
         if config.MAX_TRADING_BALANCE > 0 and current_balance > config.MAX_TRADING_BALANCE:
             effective_balance = config.MAX_TRADING_BALANCE
 
-        # Запам'ятовуємо стартовий баланс першого дня
+        # Перший запуск бота за поточний день — запам'ятовуємо стартовий баланс
         if self._start_balance is None:
             self._start_balance = effective_balance
-            log.info("📌 Стартовий торговий баланс дня: %.4f USDT", self._start_balance)
+            log.info("📌 Стартовий баланс дня: %.2f USDT", self._start_balance)
             return True
 
-        # Замінюємо current_balance на effective_balance для порівняння
-        current_balance = effective_balance
+        # Збиток від початку дня у USDT і %
+        loss_usdt = self._start_balance - effective_balance
+        loss_pct  = loss_usdt / self._start_balance if self._start_balance > 0 else 0.0
 
-        # Якщо поточний баланс впав на > DAILY_LOSS_LIMIT від стартового
-        loss_pct = (self._start_balance - current_balance) / self._start_balance
         if loss_pct >= config.DAILY_LOSS_LIMIT:
             self._is_stopped = True
             log.warning(
-                "⛔️ Денний ліміт збитків досягнуто! "
-                "Старт: %.2f → Поточний: %.2f (%.2f%%)",
-                self._start_balance, current_balance, loss_pct * 100,
+                "⛔️ Денний ліміт збитків (-%.0f%%) досягнуто!\n"
+                "   Баланс на початок дня: %.2f USDT\n"
+                "   Поточний баланс:       %.2f USDT\n"
+                "   Збиток:                -%.2f USDT",
+                config.DAILY_LOSS_LIMIT * 100,
+                self._start_balance, effective_balance, loss_usdt,
             )
+            # Telegram сповіщення
+            try:
+                from notifications import notify_daily_limit_hit
+                notify_daily_limit_hit(self._daily_pnl, effective_balance)
+            except Exception:
+                pass
             return False
 
         return True
