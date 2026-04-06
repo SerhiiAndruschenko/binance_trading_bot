@@ -20,7 +20,16 @@ TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID: str   = os.getenv("TELEGRAM_CHAT_ID", "")
 
 # ─── Торгові пари ─────────────────────────────────────────────────────────────
-SYMBOLS: list[str] = ["BNBUSDT", "XRPUSDT", "SOLUSDT", "ETHUSDT", "AVAXUSDT"]
+SYMBOLS: list[str] = [
+    "BNBUSDT",   # висока ліквідність
+    "XRPUSDT",   # топ обсяги
+    "SOLUSDT",   # активний тренд
+    "AVAXUSDT",  # гарна волатильність
+    "DOGEUSDT",  # мем-монета з реальною ліквідністю
+    "ADAUSDT",   # стабільні тренди
+    "LINKUSDT",  # добре реагує на MACD
+    "LTCUSDT",   # технічно передбачувана
+]
 
 # ─── Стратегія ────────────────────────────────────────────────────────────────
 TIMEFRAME: str  = "15m"       # таймфрейм свічок

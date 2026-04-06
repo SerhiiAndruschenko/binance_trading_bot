@@ -143,20 +143,26 @@ class RiskManager:
         quantity = self._round_quantity(symbol, quantity)
 
         # Перевірка мінімального розміру ордера
-        filters = binance.get_symbol_filters(symbol)
-        min_qty = filters["min_qty"]
+        filters      = binance.get_symbol_filters(symbol)
+        min_qty      = filters["min_qty"]
+        min_notional = filters["min_notional"]
+        notional     = quantity * entry_price   # вартість позиції в USDT
 
         if quantity <= 0 or quantity < min_qty:
-            min_notional = min_qty * entry_price / config.LEVERAGE
+            need_balance = (min_qty * entry_price / config.LEVERAGE) / config.RISK_PER_TRADE
             log.warning(
-                "⚠️  [%s] Угода пропущена: розрахована qty=%.6f < мінімум %.6f\n"
-                "    Щоб торгувати BTC потрібно мінімум ~%.0f USDT на балансі "
-                "(при ризику %.0f%% та плечі x%d).\n"
-                "    Поточний торговий баланс: %.2f USDT",
-                symbol, quantity, min_qty,
-                min_notional / config.RISK_PER_TRADE,
-                config.RISK_PER_TRADE * 100, config.LEVERAGE,
-                effective_balance,
+                "⚠️  [%s] Угода пропущена: qty=%.6f < мінімум %.6f. "
+                "Потрібно ~%.0f USDT торгового балансу.",
+                symbol, quantity, min_qty, need_balance,
+            )
+            return None
+
+        if notional < min_notional:
+            need_balance = (min_notional / config.LEVERAGE) / config.RISK_PER_TRADE
+            log.warning(
+                "⚠️  [%s] Угода пропущена: notional=%.2f USDT < мінімум %.0f USDT (-4164). "
+                "Потрібно ~%.0f USDT торгового балансу.",
+                symbol, notional, min_notional, need_balance,
             )
             return None
 

@@ -210,16 +210,24 @@ class BinanceClient:
 
     # ─── Фільтри символів (кеш) ───────────────────────────────────────────────
 
-    # Кеш: symbol → {"step_size": float, "min_qty": float, "qty_precision": int}
+    # Кеш: symbol → {"step_size", "min_qty", "qty_precision", "min_notional"}
     _symbol_filters: dict = {}
 
     def get_symbol_filters(self, symbol: str) -> dict:
         """
-        Повертає LOT_SIZE фільтр для символу (stepSize, minQty, qty_precision).
+        Повертає LOT_SIZE + MIN_NOTIONAL фільтри для символу.
         Результат кешується — exchange_info завантажується лише один раз.
+
+        Поля результату:
+          step_size     — мінімальний крок кількості (LOT_SIZE.stepSize)
+          min_qty       — мінімальна кількість (LOT_SIZE.minQty)
+          qty_precision — знаків після коми
+          min_notional  — мінімальна вартість ордера в USDT (MIN_NOTIONAL.notional)
         """
         if symbol in self._symbol_filters:
             return self._symbol_filters[symbol]
+
+        result = {"step_size": 0.001, "min_qty": 0.001, "qty_precision": 3, "min_notional": 5.0}
 
         try:
             info = self.get_exchange_info()
@@ -228,22 +236,29 @@ class BinanceClient:
                     continue
                 for f in s.get("filters", []):
                     if f["filterType"] == "LOT_SIZE":
-                        step  = float(f["stepSize"])
-                        minq  = float(f["minQty"])
-                        # Кількість знаків після коми зі stepSize ("0.001" → 3)
-                        prec  = len(f["stepSize"].rstrip("0").split(".")[-1]) if "." in f["stepSize"] else 0
-                        result = {"step_size": step, "min_qty": minq, "qty_precision": prec}
-                        self._symbol_filters[symbol] = result
-                        log.debug(
-                            "%s фільтри: stepSize=%s minQty=%s precision=%d",
-                            symbol, step, minq, prec,
+                        result["step_size"]     = float(f["stepSize"])
+                        result["min_qty"]       = float(f["minQty"])
+                        step_str = f["stepSize"]
+                        result["qty_precision"] = (
+                            len(step_str.rstrip("0").split(".")[-1])
+                            if "." in step_str else 0
                         )
-                        return result
+                    elif f["filterType"] == "MIN_NOTIONAL":
+                        # Binance Futures використовує ключ "notional"
+                        result["min_notional"] = float(
+                            f.get("notional") or f.get("minNotional") or 5.0
+                        )
+                self._symbol_filters[symbol] = result
+                log.debug(
+                    "%s фільтри: step=%s minQty=%s minNotional=%s",
+                    symbol, result["step_size"], result["min_qty"], result["min_notional"],
+                )
+                return result
         except Exception as e:
             log.warning("Не вдалося отримати фільтри для %s: %s", symbol, e)
 
         # Fallback-значення якщо API недоступний
-        fallback = {"step_size": 0.001, "min_qty": 0.001, "qty_precision": 3}
+        fallback = {"step_size": 0.001, "min_qty": 0.001, "qty_precision": 3, "min_notional": 5.0}
         self._symbol_filters[symbol] = fallback
         return fallback
 

@@ -86,11 +86,22 @@ bot_state = BotState()
 # ─── Авторизація ──────────────────────────────────────────────────────────────
 
 def _authorized(update: Update) -> bool:
-    """Перевіряє що повідомлення від авторизованого користувача."""
+    """
+    Перевіряє що команда від авторизованого користувача.
+
+    В приватному чаті: effective_chat.id == особистий ID користувача.
+    В груповому чаті:  effective_chat.id == ID групи (від'ємне число),
+                       effective_user.id  == особистий ID користувача.
+    Тому перевіряємо обидва — бот працює і в приватних, і в групових чатах.
+    """
     if not config.TELEGRAM_CHAT_ID:
         return True  # якщо не налаштовано — пропускаємо перевірку
-    user_id = str(update.effective_chat.id)
-    return user_id == str(config.TELEGRAM_CHAT_ID)
+
+    allowed = str(config.TELEGRAM_CHAT_ID)
+    chat_id = str(update.effective_chat.id) if update.effective_chat else ""
+    user_id = str(update.effective_user.id) if update.effective_user else ""
+
+    return allowed in (chat_id, user_id)
 
 
 # ─── Handlers ─────────────────────────────────────────────────────────────────
@@ -235,6 +246,32 @@ async def cmd_resume(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     await update.message.reply_text("▶️ Бот відновлено. Нові угоди відкриватимуться.")
 
 
+async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not _authorized(update):
+        return
+
+    text = (
+        "🤖 <b>Binance Futures Bot — команди</b>\n\n"
+        "<b>📊 Інформація</b>\n"
+        "/status — стан бота, баланс, відкриті позиції\n"
+        "/today  — статистика угод за сьогодні\n"
+        "/month  — статистика за поточний місяць\n\n"
+        "<b>⚙️ Управління</b>\n"
+        "/pause  — зупинити нові угоди (поточні залишаються)\n"
+        "/resume — відновити роботу після паузи\n"
+        "/stop   — закрити всі позиції і зупинити бота\n\n"
+        "<b>ℹ️ Поточні налаштування</b>\n"
+        f"Пари: {', '.join(config.SYMBOLS)}\n"
+        f"Таймфрейм: {config.TIMEFRAME} | Плече: x{config.LEVERAGE}\n"
+        f"Ризик/угода: {config.RISK_PER_TRADE*100:.0f}% | "
+        f"TP: +{config.TAKE_PROFIT_PCT*100:.1f}% | "
+        f"SL: -{config.STOP_LOSS_PCT*100:.1f}%\n"
+        f"Торговий баланс: {config.MAX_TRADING_BALANCE:.0f} USDT | "
+        f"Денний ліміт: -{config.DAILY_LOSS_LIMIT*100:.0f}%"
+    )
+    await update.message.reply_text(text, parse_mode="HTML")
+
+
 async def cmd_stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not _authorized(update):
         return
@@ -278,6 +315,8 @@ def run_telegram_bot() -> None:
                 .build()
             )
 
+            app.add_handler(CommandHandler("help",   cmd_help))
+            app.add_handler(CommandHandler("start",  cmd_help))  # аліас для /start
             app.add_handler(CommandHandler("status", cmd_status))
             app.add_handler(CommandHandler("today",  cmd_today))
             app.add_handler(CommandHandler("month",  cmd_month))
@@ -289,7 +328,12 @@ def run_telegram_bot() -> None:
             # initialize/start/polling/stop — правильний lifecycle для v20+
             async with app:
                 await app.start()
-                await app.updater.start_polling(drop_pending_updates=True)
+                # allowed_updates потрібен щоб отримувати команди з групових чатів.
+                # Без нього Telegram може не доставляти повідомлення з груп.
+                await app.updater.start_polling(
+                    drop_pending_updates=True,
+                    allowed_updates=["message", "callback_query"],
+                )
                 # Тримаємо потік живим поки бот не зупинено
                 while not bot_state.is_stopped:
                     await asyncio.sleep(1)
