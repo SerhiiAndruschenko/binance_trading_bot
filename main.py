@@ -19,10 +19,24 @@ from datetime import datetime, timezone
 import config
 from logger import log
 from binance_client import binance
-from strategy import analyze, pick_most_active_symbol, Signal
-from trader import open_position, check_exit_by_signal, close_all_positions, check_sl_tp_all
+from strategy import analyze, Signal
+from trader import (
+    open_position, check_exit_by_signal, close_all_positions,
+    check_sl_tp_all, reconcile_open_trades,
+)
 from risk_manager import risk_manager
 from notifications import notify_bot_started, notify_error
+
+# bot_state: спільний стан паузи/зупинки з Telegram-ботом.
+# Якщо Telegram не налаштований — використовується заглушка.
+try:
+    from telegram_bot import bot_state
+except Exception:
+    class _FallbackState:
+        is_stopped = False
+        is_paused  = False
+        def stop(self): pass
+    bot_state = _FallbackState()  # type: ignore[assignment]
 
 
 # ─── Graceful shutdown ────────────────────────────────────────────────────────
@@ -96,8 +110,6 @@ def scan_cycle(symbols: list[str], iteration: int) -> None:
     """
     Аналізує кожен символ і приймає торгові рішення.
     """
-    from telegram_bot import bot_state
-
     # Перевірка паузи / зупинки
     if bot_state.is_stopped:
         log.debug("Бот зупинено — пропускаємо цикл")
@@ -163,19 +175,18 @@ def main() -> None:
     except Exception as e:
         log.warning("Telegram бот не запущено: %s", e)
 
-    # 3. Сповіщення про запуск
+    # 3. Відновлення відкритих позицій після перезапуску
+    reconcile_open_trades()
+
+    # 4. Сповіщення про запуск
     try:
         notify_bot_started(balance, "TESTNET" if config.TESTNET else "MAINNET")
     except Exception as e:
         log.warning("Стартове Telegram сповіщення не надіслано: %s", e)
 
-    # 4. Визначаємо найактивнішу пару + фіксуємо всі пари
-    active_symbol = pick_most_active_symbol(config.SYMBOLS)
-    log.info("🎯 Активна пара: %s | Всі пари: %s",
-             active_symbol, ", ".join(config.SYMBOLS))
-
     # 5. Головний цикл
-    log.info("🔄 Запускаємо торговий цикл (інтервал: %d сек)…", config.SCAN_INTERVAL)
+    log.info("🔄 Запускаємо торговий цикл (інтервал: %d сек)… Пари: %s",
+             config.SCAN_INTERVAL, ", ".join(config.SYMBOLS))
     iteration = 0
 
     while _running:
@@ -185,17 +196,13 @@ def main() -> None:
 
         scan_cycle(config.SYMBOLS, iteration)
 
-        # Кожні 100 ітерацій оновлюємо найактивнішу пару
-        if iteration % 100 == 0:
-            active_symbol = pick_most_active_symbol(config.SYMBOLS)
-
         # Чекаємо до наступного циклу
         for _ in range(config.SCAN_INTERVAL):
             if not _running:
                 break
             time.sleep(1)
 
-    # 6. Завершення
+    # 7. Завершення
     log.info("🛑 Бот зупиняється… Закриваємо позиції…")
     close_all_positions("завершення роботи бота")
     log.info("👋 Бот завершив роботу")

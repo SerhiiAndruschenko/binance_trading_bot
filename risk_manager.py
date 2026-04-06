@@ -1,14 +1,25 @@
 """
 risk_manager.py — Управління ризиками: розмір позиції, SL/TP, денний ліміт.
+
+Денний стан (start_balance, daily_pnl, daily_date) зберігається у state.json
+у корені проекту. При перезапуску бота стан відновлюється якщо дата актуальна.
 """
 
+import json
+import math
 from dataclasses import dataclass
 from datetime import date, datetime, timezone
+from pathlib import Path
 from typing import Optional
 
 import config
 from binance_client import binance
 from logger import log
+
+
+# Файл для збереження денного стану між перезапусками
+import os
+STATE_FILE = Path(os.getenv("STATE_DIR", str(Path(__file__).parent))) / "state.json"
 
 
 @dataclass
@@ -30,13 +41,76 @@ class RiskManager:
     - розрахунок SL і TP
     - контроль денного ліміту збитків
     - захист від дублювання ордерів
+    - персистентність денного стану між перезапусками (state.json)
     """
 
     def __init__(self) -> None:
-        self._daily_pnl: float = 0.0
-        self._daily_date: date = date.today()    # UTC-дата поточного дня
-        self._start_balance: Optional[float] = None   # баланс на початок дня
-        self._is_stopped: bool = False
+        self._daily_pnl: float          = 0.0
+        self._daily_date: date          = self._utc_today()
+        self._start_balance: Optional[float] = None
+        self._is_stopped: bool          = False
+        # Завантажуємо збережений стан (якщо дата актуальна)
+        self._load_state()
+
+    # ─── Персистентність ──────────────────────────────────────────────────────
+
+    def _load_state(self) -> None:
+        """
+        Читає state.json при ініціалізації.
+        Якщо збережена дата == сьогоднішній UTC-день → відновлює стан.
+        Якщо дата застаріла → ігнорує файл (новий день починається з нуля).
+        """
+        if not STATE_FILE.exists():
+            return
+        try:
+            with open(STATE_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            saved_date = date.fromisoformat(data["daily_date"])
+            if saved_date == self._utc_today():
+                self._daily_date    = saved_date
+                self._start_balance = float(data["start_balance"])
+                self._daily_pnl     = float(data.get("daily_pnl", 0.0))
+                self._is_stopped    = bool(data.get("is_stopped", False))
+                log.info(
+                    "♻️ Відновлено денний стан: start_balance=%.2f, pnl=%+.2f USDT",
+                    self._start_balance, self._daily_pnl,
+                )
+                if self._is_stopped:
+                    log.warning(
+                        "♻️ Відновлено: денний ліміт вже досягнутий сьогодні — "
+                        "бот залишається зупиненим до 00:00 UTC"
+                    )
+            else:
+                log.debug(
+                    "state.json: дата %s застаріла (сьогодні %s) — починаємо новий день",
+                    saved_date, self._utc_today(),
+                )
+        except Exception as e:
+            log.warning("Не вдалося прочитати state.json: %s", e)
+
+    def _save_state(self) -> None:
+        """
+        Зберігає поточний денний стан у state.json.
+        Викликається після кожної зміни _daily_pnl або _start_balance.
+        """
+        if self._start_balance is None:
+            return
+        try:
+            data = {
+                "daily_date":    self._daily_date.isoformat(),
+                "start_balance": round(self._start_balance, 6),
+                "daily_pnl":     round(self._daily_pnl, 6),
+                "is_stopped":    self._is_stopped,
+            }
+            with open(STATE_FILE, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+            log.debug(
+                "💾 state.json оновлено: date=%s, start=%.2f, pnl=%+.2f",
+                data["daily_date"], data["start_balance"], data["daily_pnl"],
+            )
+        except Exception as e:
+            log.warning("Не вдалося зберегти state.json: %s", e)
 
     # ─── Денний ліміт ─────────────────────────────────────────────────────────
 
@@ -48,7 +122,7 @@ class RiskManager:
         """
         Перевіряє чи почався новий UTC-день.
         Якщо так — скидає денний P&L і зберігає поточний баланс
-        як стартовий для нового дня.
+        як стартовий для нового дня. Одразу зберігає state.json.
         """
         today = self._utc_today()
         if today != self._daily_date:
@@ -56,7 +130,7 @@ class RiskManager:
             self._daily_pnl    = 0.0
             self._daily_date   = today
             self._is_stopped   = False
-            # Стартовий баланс нового дня = фактичний баланс о 00:00 UTC
+            # Стартовий баланс нового дня = ефективний баланс о 00:00 UTC
             effective = current_balance
             if config.MAX_TRADING_BALANCE > 0 and current_balance > config.MAX_TRADING_BALANCE:
                 effective = config.MAX_TRADING_BALANCE
@@ -65,11 +139,13 @@ class RiskManager:
                 "📅 Новий день (%s → %s) | Стартовий баланс: %.2f USDT",
                 prev, today, self._start_balance,
             )
+            self._save_state()
 
     def record_trade_pnl(self, pnl_usdt: float) -> None:
-        """Записує результат закритої угоди в денний P&L."""
+        """Записує результат закритої угоди в денний P&L. Зберігає state.json."""
         self._daily_pnl += pnl_usdt
         log.info("💹 Денний P&L: %+.4f USDT", self._daily_pnl)
+        self._save_state()
 
     def check_daily_loss_limit(self, current_balance: float) -> bool:
         """
@@ -79,7 +155,7 @@ class RiskManager:
         Ліміт = DAILY_LOSS_LIMIT % від балансу на початок поточного UTC-дня.
         При переході на новий день стартовий баланс оновлюється автоматично.
         """
-        # Перевірка і скидання при зміні дня (передаємо баланс для запису нового старту)
+        # Перевірка і скидання при зміні дня
         self._reset_daily_if_needed(current_balance)
 
         if self._is_stopped:
@@ -94,6 +170,7 @@ class RiskManager:
         if self._start_balance is None:
             self._start_balance = effective_balance
             log.info("📌 Стартовий баланс дня: %.2f USDT", self._start_balance)
+            self._save_state()
             return True
 
         # Збиток від початку дня у USDT і %
@@ -224,7 +301,6 @@ class RiskManager:
         Округлює кількість до stepSize отриманого з біржі.
         Використовує floor (вниз) щоб не перевищити баланс.
         """
-        import math
         filters = binance.get_symbol_filters(symbol)
         step = filters["step_size"]
         prec = filters["qty_precision"]

@@ -39,6 +39,93 @@ class OpenTrade:
 _open_trades: dict[str, OpenTrade] = {}
 
 
+# ─── Відновлення стану після перезапуску ──────────────────────────────────────
+
+def reconcile_open_trades() -> None:
+    """
+    Відновлює список відкритих угод з біржі після перезапуску бота.
+    Викликається один раз при старті, перед першим торговим циклом.
+
+    - Якщо _open_trades вже не порожній (нормальний старт) — нічого не робить.
+    - Для кожної позиції з positionAmt != 0 відновлює OpenTrade з параметрами
+      SL/TP розрахованими за поточним конфігом від ціни входу.
+    """
+    if _open_trades:
+        log.debug("reconcile_open_trades: _open_trades вже заповнений — пропускаємо")
+        return
+
+    try:
+        positions = binance.get_open_positions()
+    except Exception as e:
+        log.error("reconcile_open_trades: не вдалося отримати позиції: %s", e)
+        return
+
+    restored: list[str] = []
+
+    for pos in positions:
+        pos_amt = float(pos.get("positionAmt", 0))
+        if pos_amt == 0:
+            continue
+
+        symbol      = pos["symbol"]
+        entry_price = float(pos.get("entryPrice", 0))
+
+        if entry_price <= 0:
+            log.warning(
+                "reconcile_open_trades: немає ціни входу для %s — пропускаємо",
+                symbol,
+            )
+            continue
+
+        signal_str = "LONG" if pos_amt > 0 else "SHORT"
+        quantity   = abs(pos_amt)
+
+        # SL/TP відновлюємо за поточним конфігом від ціни входу
+        if signal_str == "LONG":
+            side        = "BUY"
+            take_profit = round(entry_price * (1 + config.TAKE_PROFIT_PCT), 2)
+            stop_loss   = round(entry_price * (1 - config.STOP_LOSS_PCT), 2)
+        else:
+            side        = "SELL"
+            take_profit = round(entry_price * (1 - config.TAKE_PROFIT_PCT), 2)
+            stop_loss   = round(entry_price * (1 + config.STOP_LOSS_PCT), 2)
+
+        params = TradeParams(
+            symbol=symbol,
+            side=side,
+            quantity=quantity,
+            entry_price=entry_price,
+            take_profit=take_profit,
+            stop_loss=stop_loss,
+            usdt_risk=0.0,  # невідомо після перезапуску
+        )
+
+        update_time_ms = int(pos.get("updateTime", 0))
+        opened_at = (
+            datetime.fromtimestamp(update_time_ms / 1000, tz=timezone.utc)
+            if update_time_ms > 0
+            else datetime.now(timezone.utc)
+        )
+
+        trade = OpenTrade(
+            symbol=symbol,
+            signal=signal_str,
+            params=params,
+            order_id=0,  # невідомо після перезапуску
+            opened_at=opened_at,
+        )
+        _open_trades[symbol] = trade
+        restored.append(f"{symbol} ({signal_str})")
+
+    if restored:
+        log.info(
+            "♻️ Відновлено %d відкритих позицій після перезапуску: %s",
+            len(restored), ", ".join(restored),
+        )
+    else:
+        log.info("♻️ Відкритих позицій на біржі не знайдено — починаємо з нуля")
+
+
 # ─── Підготовка пари ──────────────────────────────────────────────────────────
 
 def _prepare_symbol(symbol: str) -> bool:
@@ -71,7 +158,8 @@ def open_position(result: SignalResult) -> Optional[OpenTrade]:
     # 2а. Глобальний ліміт відкритих позицій
     try:
         all_positions = binance.get_open_positions()
-        total_open = len(all_positions)
+        # Binance повертає всі символи (включно з positionAmt=0) — рахуємо тільки реальні
+        total_open = len([p for p in all_positions if float(p.get("positionAmt", 0)) != 0])
         if total_open >= config.MAX_OPEN_TRADES_GLOBAL:
             log.info(
                 "[%s] Пропуск: досягнуто глобальний ліміт %d позицій (зараз відкрито: %d)",
@@ -179,6 +267,10 @@ def open_position(result: SignalResult) -> Optional[OpenTrade]:
 
 # ─── Закриття позиції ─────────────────────────────────────────────────────────
 
+# Комісія Binance Futures taker (0.05%) × 2 сторони (вхід + вихід)
+TAKER_FEE = 0.0005
+
+
 def close_position(symbol: str, reason: str = "сигнал") -> bool:
     """
     Закриває позицію для символу ринковим ордером.
@@ -192,17 +284,17 @@ def close_position(symbol: str, reason: str = "сигнал") -> bool:
             _open_trades.pop(symbol, None)
             return False
 
-        pos_amt = float(pos["positionAmt"])
+        pos_amt     = float(pos["positionAmt"])
         entry_price = float(pos.get("entryPrice", 0))
 
         # Скасовуємо всі відкриті ордери (SL/TP)
         binance.cancel_all_open_orders(symbol)
 
         # Закриваємо позицію
-        order = binance.close_position(symbol, pos_amt)
+        order      = binance.close_position(symbol, pos_amt)
         exit_price = float(order.get("avgPrice", 0) or 0)
 
-        # Розраховуємо P&L
+        # Розраховуємо P&L (без комісії)
         pnl_usdt = 0.0
         pnl_pct  = 0.0
         if entry_price > 0 and exit_price > 0:
@@ -213,12 +305,17 @@ def close_position(symbol: str, reason: str = "сигнал") -> bool:
                 pnl_pct  = (entry_price - exit_price) / entry_price * 100 * config.LEVERAGE
                 pnl_usdt = (entry_price - exit_price) * abs(pos_amt)
 
+        # Комісія: taker 0.05% від вартості кожної ноги окремо (вхід + вихід)
+        commission = abs(pos_amt) * TAKER_FEE * (entry_price + exit_price)
+        pnl_usdt  -= commission
+
         risk_manager.record_trade_pnl(pnl_usdt)
 
         log.info(
             "🔴 [%s] Позиція закрита (%s) | Вхід: %.2f → Вихід: %.2f | "
-            "P&L: %.4f USDT (%.2f%%)",
-            symbol, reason, entry_price, exit_price, pnl_usdt, pnl_pct,
+            "P&L: %.4f USDT (%.2f%%) | Комісія: -%.4f USDT",
+            symbol, reason, entry_price, exit_price,
+            pnl_usdt, pnl_pct, commission,
         )
 
         # Telegram сповіщення
@@ -245,6 +342,8 @@ def close_all_positions(reason: str = "команда /stop") -> None:
         log.info("Немає відкритих позицій")
         return
     for pos in positions:
+        if float(pos.get("positionAmt", 0)) == 0:
+            continue
         sym = pos["symbol"]
         log.info("Закриваємо %s (%s)…", sym, reason)
         close_position(sym, reason)
@@ -286,6 +385,8 @@ def check_sl_tp_all() -> None:
 
     Використовується замість exchange-side STOP_MARKET / TAKE_PROFIT_MARKET,
     бо Binance Testnet повертає помилку -4120 для цих типів ордерів.
+
+    P&L відображається з урахуванням плеча (x{LEVERAGE}).
     """
     if not _open_trades:
         return
@@ -310,8 +411,11 @@ def check_sl_tp_all() -> None:
                     )
                     close_position(symbol, f"SL {sl:.2f}")
                 else:
-                    # Показуємо P&L у реальному часі
-                    pnl_pct = (current_price - trade.params.entry_price) / trade.params.entry_price * 100
+                    # P&L з урахуванням плеча
+                    pnl_pct = (
+                        (current_price - trade.params.entry_price)
+                        / trade.params.entry_price * 100 * config.LEVERAGE
+                    )
                     log.info(
                         "📌 [%s] LONG | Ціна=%.2f | TP=%.2f | SL=%.2f | P&L=%.2f%%",
                         symbol, current_price, tp, sl, pnl_pct,
@@ -331,7 +435,11 @@ def check_sl_tp_all() -> None:
                     )
                     close_position(symbol, f"SL {sl:.2f}")
                 else:
-                    pnl_pct = (trade.params.entry_price - current_price) / trade.params.entry_price * 100
+                    # P&L з урахуванням плеча
+                    pnl_pct = (
+                        (trade.params.entry_price - current_price)
+                        / trade.params.entry_price * 100 * config.LEVERAGE
+                    )
                     log.info(
                         "📌 [%s] SHORT | Ціна=%.2f | TP=%.2f | SL=%.2f | P&L=%.2f%%",
                         symbol, current_price, tp, sl, pnl_pct,
