@@ -106,21 +106,34 @@ def _macd_cross_up(df: pd.DataFrame) -> bool:
     """
     MACD лінія перетнула сигнальну знизу вгору
     між передостанньою (-2) та останньою (-1) свічкою.
+    Додатково перевіряє що розходження >= MACD_MIN_DIFF
+    (фільтр слабких сигналів на флеті).
     """
     prev_macd   = df["macd"].iloc[-2]
     prev_signal = df["macd_signal"].iloc[-2]
     curr_macd   = df["macd"].iloc[-1]
     curr_signal = df["macd_signal"].iloc[-1]
-    return (prev_macd <= prev_signal) and (curr_macd > curr_signal)
+    return (
+        (prev_macd <= prev_signal) and
+        (curr_macd > curr_signal) and
+        (abs(curr_macd - curr_signal) >= config.MACD_MIN_DIFF)
+    )
 
 
 def _macd_cross_down(df: pd.DataFrame) -> bool:
-    """MACD лінія перетнула сигнальну зверху вниз."""
+    """
+    MACD лінія перетнула сигнальну зверху вниз.
+    Додатково перевіряє що розходження >= MACD_MIN_DIFF.
+    """
     prev_macd   = df["macd"].iloc[-2]
     prev_signal = df["macd_signal"].iloc[-2]
     curr_macd   = df["macd"].iloc[-1]
     curr_signal = df["macd_signal"].iloc[-1]
-    return (prev_macd >= prev_signal) and (curr_macd < curr_signal)
+    return (
+        (prev_macd >= prev_signal) and
+        (curr_macd < curr_signal) and
+        (abs(curr_macd - curr_signal) >= config.MACD_MIN_DIFF)
+    )
 
 
 def analyze(symbol: str) -> SignalResult:

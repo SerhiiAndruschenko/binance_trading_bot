@@ -43,13 +43,17 @@ EMA_SLOW: int  = 50
 RSI_PERIOD: int    = 14
 RSI_LONG_MIN: float  = 40.0   # RSI для LONG: нижня межа
 RSI_LONG_MAX: float  = 65.0   # RSI для LONG: верхня межа
-RSI_SHORT_MIN: float = 35.0   # RSI для SHORT: нижня межа
+RSI_SHORT_MIN: float = 25.0   # RSI для SHORT: нижня межа
 RSI_SHORT_MAX: float = 60.0   # RSI для SHORT: верхня межа
 
 # Параметри MACD
 MACD_FAST: int   = 12
 MACD_SLOW: int   = 26
 MACD_SIGNAL: int = 9
+
+# Мінімальне розходження між MACD і сигнальною лінією.
+# Фільтрує слабкі сигнали і шум на флетовому ринку.
+MACD_MIN_DIFF: float = 0.0010
 
 # ─── Управління ризиками ──────────────────────────────────────────────────────
 LEVERAGE: int            = 5      # плече (isolated margin)
