@@ -14,6 +14,13 @@ if TYPE_CHECKING:
     from trader import OpenTrade
 
 
+# ─── Хелпер для топіків ───────────────────────────────────────────────────────
+
+def _thread_id() -> "int | None":
+    """Повертає message_thread_id якщо задано в конфізі, інакше None."""
+    return int(config.TELEGRAM_THREAD_ID) if config.TELEGRAM_THREAD_ID else None
+
+
 # ─── Низькорівневий відправник ────────────────────────────────────────────────
 
 async def _send(text: str) -> None:
@@ -26,6 +33,7 @@ async def _send(text: str) -> None:
         bot = Bot(token=config.TELEGRAM_BOT_TOKEN)
         await bot.send_message(
             chat_id=config.TELEGRAM_CHAT_ID,
+            message_thread_id=_thread_id(),
             text=text,
             parse_mode="HTML",
         )

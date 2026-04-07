@@ -18,6 +18,7 @@ API_SECRET: str = os.getenv("API_SECRET", "")
 # ─── Telegram ─────────────────────────────────────────────────────────────────
 TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID: str   = os.getenv("TELEGRAM_CHAT_ID", "")
+TELEGRAM_THREAD_ID: str = os.getenv("TELEGRAM_THREAD_ID", "")
 
 # ─── Торгові пари ─────────────────────────────────────────────────────────────
 SYMBOLS: list[str] = [

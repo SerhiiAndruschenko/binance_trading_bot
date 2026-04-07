@@ -26,6 +26,7 @@ from telegram.ext import (
 
 import config
 from logger import log
+from notifications import _thread_id
 
 
 # ─── Спільний стан між ботом та головним циклом ───────────────────────────────
@@ -135,7 +136,6 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
             for sym, trade in open_trades.items():
                 pos = pos_map.get(sym, {})
                 unrealized = float(pos.get("unrealizedProfit", 0))
-                entry = trade.params.entry_price
                 sign = "+" if unrealized >= 0 else ""
                 lines.append(
                     f"  └ {trade.signal} {sym} | {sign}{unrealized:.4f} USDT"
@@ -143,11 +143,18 @@ async def cmd_status(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
         lines.append(f"📅 Денний P&L: {risk_manager.daily_pnl:+.4f} USDT")
 
-        await update.message.reply_text("\n".join(lines), parse_mode="HTML")
+        await update.message.reply_text(
+            "\n".join(lines),
+            parse_mode="HTML",
+            message_thread_id=_thread_id(),
+        )
 
     except Exception as e:
         log.error("Помилка /status: %s", e)
-        await update.message.reply_text(f"⚠️ Помилка отримання статусу: {e}")
+        await update.message.reply_text(
+            f"⚠️ Помилка отримання статусу: {e}",
+            message_thread_id=_thread_id(),
+        )
 
 
 async def cmd_today(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -159,7 +166,8 @@ async def cmd_today(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if not trades:
         await update.message.reply_text(
-            f"📅 Сьогодні, {today_str}\nУгод ще не було"
+            f"📅 Сьогодні, {today_str}\nУгод ще не було",
+            message_thread_id=_thread_id(),
         )
         return
 
@@ -175,7 +183,11 @@ async def cmd_today(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"💚 Прибуткових: {winners} | 💔 Збиткових: {losers}\n"
         f"💰 P&L: {sign}{pnl:.4f} USDT"
     )
-    await update.message.reply_text(text, parse_mode="HTML")
+    await update.message.reply_text(
+        text,
+        parse_mode="HTML",
+        message_thread_id=_thread_id(),
+    )
 
 
 async def cmd_month(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -187,7 +199,8 @@ async def cmd_month(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     if not trades:
         await update.message.reply_text(
-            f"📆 {month_str}\nУгод ще не було"
+            f"📆 {month_str}\nУгод ще не було",
+            message_thread_id=_thread_id(),
         )
         return
 
@@ -216,7 +229,11 @@ async def cmd_month(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"💰 P&L: {sign}{pnl:.4f} USDT\n"
         f"📉 Макс. просадка: -{max_drawdown:.4f} USDT"
     )
-    await update.message.reply_text(text, parse_mode="HTML")
+    await update.message.reply_text(
+        text,
+        parse_mode="HTML",
+        message_thread_id=_thread_id(),
+    )
 
 
 async def cmd_pause(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -228,7 +245,8 @@ async def cmd_pause(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(
         "⏸ Бот на паузі.\nНові угоди не відкриватимуться.\n"
         "Поточні позиції залишаються активними.\n"
-        "Використайте /resume для відновлення."
+        "Використайте /resume для відновлення.",
+        message_thread_id=_thread_id(),
     )
 
 
@@ -237,13 +255,17 @@ async def cmd_resume(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         return
     if bot_state.is_stopped:
         await update.message.reply_text(
-            "⛔️ Бот зупинений командою /stop. Перезапустіть процес."
+            "⛔️ Бот зупинений командою /stop. Перезапустіть процес.",
+            message_thread_id=_thread_id(),
         )
         return
     bot_state.resume()
     from notifications import notify_bot_resumed
     notify_bot_resumed()
-    await update.message.reply_text("▶️ Бот відновлено. Нові угоди відкриватимуться.")
+    await update.message.reply_text(
+        "▶️ Бот відновлено. Нові угоди відкриватимуться.",
+        message_thread_id=_thread_id(),
+    )
 
 
 async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -269,7 +291,11 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"Торговий баланс: {config.MAX_TRADING_BALANCE:.0f} USDT | "
         f"Денний ліміт: -{config.DAILY_LOSS_LIMIT*100:.0f}%"
     )
-    await update.message.reply_text(text, parse_mode="HTML")
+    await update.message.reply_text(
+        text,
+        parse_mode="HTML",
+        message_thread_id=_thread_id(),
+    )
 
 
 async def cmd_stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -277,7 +303,8 @@ async def cmd_stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
 
     await update.message.reply_text(
-        "⛔️ Зупиняю бота...\nЗакриваю всі відкриті позиції..."
+        "⛔️ Зупиняю бота...\nЗакриваю всі відкриті позиції...",
+        message_thread_id=_thread_id(),
     )
 
     try:
@@ -286,11 +313,15 @@ async def cmd_stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         bot_state.stop()
         await update.message.reply_text(
             "✅ Всі позиції закриті. Бот зупинено.\n"
-            "Перезапустіть скрипт для продовження роботи."
+            "Перезапустіть скрипт для продовження роботи.",
+            message_thread_id=_thread_id(),
         )
     except Exception as e:
         log.error("Помилка при /stop: %s", e)
-        await update.message.reply_text(f"⚠️ Помилка при зупинці: {e}")
+        await update.message.reply_text(
+            f"⚠️ Помилка при зупинці: {e}",
+            message_thread_id=_thread_id(),
+        )
 
 
 # ─── Запуск бота ──────────────────────────────────────────────────────────────
