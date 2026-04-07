@@ -292,7 +292,20 @@ def close_position(symbol: str, reason: str = "сигнал") -> bool:
 
         # Закриваємо позицію
         order      = binance.close_position(symbol, pos_amt)
-        exit_price = float(order.get("avgPrice", 0) or 0)
+        exit_price = float(order.get("avgPrice") or 0)
+        if exit_price == 0:
+            try:
+                exit_price = binance.get_symbol_price(symbol)
+                log.debug(
+                    "[%s] avgPrice відсутній — використано поточну ціну %.2f",
+                    symbol, exit_price,
+                )
+            except Exception:
+                exit_price = entry_price  # крайній fallback
+                log.warning(
+                    "[%s] Не вдалось отримати ціну виходу — використано ціну входу",
+                    symbol,
+                )
 
         # Розраховуємо P&L (без комісії)
         pnl_usdt = 0.0
