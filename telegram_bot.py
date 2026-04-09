@@ -87,20 +87,47 @@ bot_state = BotState()
 def _authorized(update: Update) -> bool:
     """
     Перевіряє що команда від авторизованого користувача.
-
-    В приватному чаті: effective_chat.id == особистий ID користувача.
-    В груповому чаті:  effective_chat.id == ID групи (від'ємне число),
-                       effective_user.id  == особистий ID користувача.
-    Тому перевіряємо обидва — бот працює і в приватних, і в групових чатах.
+    Завжди логує фактичні ID — щоб одразу бачити їх у логах при діагностиці.
     """
-    if not config.TELEGRAM_CHAT_ID:
-        return True  # якщо не налаштовано — пропускаємо перевірку
-
-    allowed = str(config.TELEGRAM_CHAT_ID)
     chat_id = str(update.effective_chat.id) if update.effective_chat else ""
     user_id = str(update.effective_user.id) if update.effective_user else ""
 
-    return allowed in (chat_id, user_id)
+    if not config.TELEGRAM_CHAT_ID:
+        log.info("🔐 Auth: TELEGRAM_CHAT_ID не задано — дозволено всім | chat=%s user=%s",
+                 chat_id, user_id)
+        return True
+
+    allowed = str(config.TELEGRAM_CHAT_ID)
+    result   = allowed in (chat_id, user_id)
+
+    if result:
+        log.debug("✅ Auth OK | chat=%s user=%s", chat_id, user_id)
+    else:
+        log.warning(
+            "⛔ Auth FAIL | TELEGRAM_CHAT_ID='%s' | chat_id='%s' | user_id='%s' — "
+            "оновіть TELEGRAM_CHAT_ID у .env на одне з цих значень",
+            allowed, chat_id, user_id,
+        )
+    return result
+
+
+# ─── Глобальний обробник помилок ──────────────────────────────────────────────
+
+async def _error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Ловить всі необроблені винятки з хендлерів команд.
+    Без цього python-telegram-bot ковтає помилки мовчки.
+    """
+    log.error("❌ Помилка в Telegram хендлері: %s", context.error, exc_info=context.error)
+    # Намагаємося повідомити користувача
+    if isinstance(update, Update) and update.effective_message:
+        try:
+            await update.effective_message.reply_text(
+                f"⚠️ Внутрішня помилка бота:\n<code>{context.error}</code>",
+                parse_mode="HTML",
+            )
+        except Exception:
+            pass
 
 
 # ─── Handlers ─────────────────────────────────────────────────────────────────
@@ -245,6 +272,10 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not _authorized(update):
         return
 
+    if not update.message:
+        log.warning("cmd_help: update.message is None")
+        return
+
     text = (
         "🤖 <b>Binance Futures Bot — команди</b>\n\n"
         "<b>📊 Інформація</b>\n"
@@ -264,7 +295,10 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"Торговий баланс: {config.MAX_TRADING_BALANCE:.0f} USDT | "
         f"Денний ліміт: -{config.DAILY_LOSS_LIMIT*100:.0f}%"
     )
-    await update.message.reply_text(text, parse_mode="HTML")
+    try:
+        await update.message.reply_text(text, parse_mode="HTML")
+    except Exception as e:
+        log.error("cmd_help reply failed: %s", e)
 
 
 async def cmd_stop(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -318,6 +352,9 @@ def run_telegram_bot() -> None:
             app.add_handler(CommandHandler("pause",  cmd_pause))
             app.add_handler(CommandHandler("resume", cmd_resume))
             app.add_handler(CommandHandler("stop",   cmd_stop))
+
+            # Реєструємо глобальний обробник — ловить всі винятки з хендлерів
+            app.add_error_handler(_error_handler)
 
             log.info("✅ Telegram бот підключено — слухаємо команди")
             # initialize/start/polling/stop — правильний lifecycle для v20+
