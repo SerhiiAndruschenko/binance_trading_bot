@@ -93,6 +93,22 @@ class BinanceClient:
         return 0.0
 
     @retry()
+    def get_balance_details(self) -> dict:
+        """
+        Повертає детальну інформацію про USDT-баланс:
+          available  — доступний баланс (для відкриття позицій)
+          wallet     — баланс гаманця (без нереалізованого P&L)
+        """
+        balances = self.client.futures_account_balance()
+        for b in balances:
+            if b["asset"] == "USDT":
+                return {
+                    "available": float(b["availableBalance"]),
+                    "wallet":    float(b["balance"]),
+                }
+        return {"available": 0.0, "wallet": 0.0}
+
+    @retry()
     def get_open_positions(self) -> list[dict]:
         """Повертає список відкритих позицій (де positionAmt != 0)."""
         positions = self.client.futures_position_information()

@@ -19,6 +19,8 @@ API_SECRET: str = os.getenv("API_SECRET", "")
 TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID: str   = os.getenv("TELEGRAM_CHAT_ID", "")
 TELEGRAM_THREAD_ID: str = os.getenv("TELEGRAM_THREAD_ID", "")
+# Мітка бота — відображається у заголовку повідомлень (наприклад "Main", "Test")
+BOT_LABEL: str = os.getenv("BOT_LABEL", "Main")
 
 # ─── Торгові пари ─────────────────────────────────────────────────────────────
 SYMBOLS: list[str] = [
