@@ -79,6 +79,8 @@ MAX_OPEN_TRADES_GLOBAL: int = int(os.getenv("MAX_OPEN_TRADES_GLOBAL", "3"))
 # ─── Retry логіка ─────────────────────────────────────────────────────────────
 API_RETRY_COUNT: int   = 3
 API_RETRY_DELAY: float = 5.0   # секунд між спробами
+# Таймаут HTTP-запиту (секунд). Testnet буває повільним — збільшено до 30.
+API_TIMEOUT: int = int(os.getenv("API_TIMEOUT", "30"))
 
 # ─── Інтервал перевірки (секунди) ─────────────────────────────────────────────
 SCAN_INTERVAL: int = 60   # кожну хвилину (пара сканується раз на 15-хв свічку)

@@ -7,6 +7,7 @@ import time
 import functools
 from typing import Optional, Any
 
+import requests.exceptions
 from binance.client import Client
 from binance.exceptions import BinanceAPIException, BinanceRequestException
 
@@ -16,9 +17,23 @@ from logger import log
 
 # ─── Retry-декоратор ──────────────────────────────────────────────────────────
 
+# Всі типи помилок, при яких має сенс повторити запит.
+# requests.exceptions.Timeout / ConnectionError не є підкласами вбудованих
+# ConnectionError / TimeoutError, тому їх потрібно додавати явно.
+_RETRYABLE = (
+    BinanceAPIException,
+    BinanceRequestException,
+    requests.exceptions.Timeout,
+    requests.exceptions.ConnectionError,
+    ConnectionError,
+    TimeoutError,
+    OSError,
+)
+
+
 def retry(max_attempts: int = config.API_RETRY_COUNT,
           delay: float = config.API_RETRY_DELAY):
-    """Декоратор: повторює виклик при помилці з'єднання / API."""
+    """Декоратор: повторює виклик при мережевих помилках та помилках API."""
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -26,8 +41,7 @@ def retry(max_attempts: int = config.API_RETRY_COUNT,
             for attempt in range(1, max_attempts + 1):
                 try:
                     return func(*args, **kwargs)
-                except (BinanceAPIException, BinanceRequestException,
-                        ConnectionError, TimeoutError) as exc:
+                except _RETRYABLE as exc:
                     last_exc = exc
                     log.warning(
                         "Спроба %d/%d — %s: %s",
@@ -63,11 +77,16 @@ class BinanceClient:
 
         testnet_url = "https://testnet.binancefuture.com"
 
+        # requests_params передається у всі HTTP-запити python-binance.
+        # Testnet буває повільним — збільшений таймаут зменшує хибні timeout-помилки.
+        req_params = {"timeout": config.API_TIMEOUT}
+
         if config.TESTNET:
             self.client = Client(
                 api_key=config.API_KEY,
                 api_secret=config.API_SECRET,
                 testnet=True,
+                requests_params=req_params,
             )
             # python-binance потребує явного URL для ф'ючерсного testnet
             self.client.FUTURES_URL = testnet_url
@@ -76,6 +95,7 @@ class BinanceClient:
             self.client = Client(
                 api_key=config.API_KEY,
                 api_secret=config.API_SECRET,
+                requests_params=req_params,
             )
             log.info("🚀 Режим: MAINNET")
 
